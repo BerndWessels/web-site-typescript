@@ -1,0 +1,25 @@
+{
+  "name": "manapaho",
+  "version": "0.0.0",
+  "authors": [
+    "'BerndWessels' <wesselsbernd@gmail.com>"
+  ],
+  "description": "The manapaho website project.",
+  "license": "MIT",
+  "homepage": "https://github.com/manapaho",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "client/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.4.0",
+    "angular-nojq": "*",
+    "angular-route": "~1.4.0",
+    "angular-ui-grid": "~3.0.0-rc.20",
+    "lodash": "~3.7.0"
+  }
+}

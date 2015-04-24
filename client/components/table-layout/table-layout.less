@@ -1,0 +1,37 @@
+table-layout {
+  background-color: #dddddd;
+  table {
+    border-spacing: 0;
+    empty-cells: hide;
+    table-layout: fixed;
+    border-collapse: separate;
+    > tbody {
+      > tr {
+        > td {
+          padding: 0;
+          border: 1px solid #ffffff;
+          &.drag-over-left {
+            border-left: 1px solid red !important;
+          }
+          &.drag-over-top {
+            border-top: 1px solid red !important;;
+          }
+          &.drag-over-right {
+            border-right: 1px solid red !important;;
+          }
+          &.drag-over-bottom {
+            border-bottom: 1px solid red !important;;
+          }
+          > table-layout-cell {
+            display: block;
+            overflow: hidden;
+            min-height: 20px;
+            &.selected {
+              background-color: lightpink;
+            }
+          }
+        }
+      }
+    }
+  }
+}

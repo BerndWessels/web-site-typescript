@@ -1,0 +1,91 @@
+(function () {
+    'use strict';
+    directive.$inject = ['dragDropService'];
+    function directive(dragDropService) {
+        return {
+            restrict: 'A',
+            require: '^tableLayout',
+            link: link
+        };
+        function link(scope, instanceElement, instanceAttributes, controller, transclude) {
+            instanceElement.on('dragenter', function (eventObject) {
+                var dragEvent = eventObject;
+                if (dragEvent.dataTransfer.effectAllowed === 'move') {
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+                    event.preventDefault();
+                }
+            });
+            instanceElement.on('dragover', function (eventObject) {
+                var dragEvent = eventObject;
+                if (dragEvent.dataTransfer.effectAllowed === 'move') {
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+                    var side = calcSide(instanceElement, eventObject);
+                    switch (side) {
+                        case 'left':
+                            instanceElement.addClass('drag-over-left');
+                            break;
+                        case 'top':
+                            instanceElement.addClass('drag-over-top');
+                            break;
+                        case 'right':
+                            instanceElement.addClass('drag-over-right');
+                            break;
+                        case 'bottom':
+                            instanceElement.addClass('drag-over-bottom');
+                            break;
+                    }
+                    event.preventDefault();
+                }
+            });
+            instanceElement.on('dragleave', function (eventObject) {
+                var dragEvent = eventObject;
+                if (dragEvent.dataTransfer.effectAllowed === 'move') {
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+                    event.preventDefault();
+                }
+            });
+            instanceElement.on('drop', function (eventObject) {
+                var dragEvent = eventObject;
+                if (dragEvent.dataTransfer.effectAllowed === 'move') {
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+                    var data = dragDropService.getData();
+                    var side = calcSide(instanceElement, eventObject);
+                    scope.$apply(function () {
+                        controller.drop(scope.$parent.$index, scope.$index, side, data);
+                    });
+                    event.preventDefault();
+                }
+            });
+            instanceElement.on('click', function (eventObject) {
+                scope.$apply(function () {
+                    controller.layout.selectedCell = scope.cell;
+                });
+            });
+        }
+    }
+    function calcSide(instanceElement, eventObject) {
+        var mouseX = eventObject.clientX;
+        var mouseY = eventObject.clientY;
+        var rectObject = instanceElement[0].getBoundingClientRect();
+        var left = (mouseX - rectObject.left) / rectObject.width;
+        var right = (rectObject.right - mouseX) / rectObject.width;
+        var top = (mouseY - rectObject.top) / rectObject.height;
+        var bottom = (rectObject.bottom - mouseY) / rectObject.height;
+        instanceElement.css({ 'borderLeft': '', 'borderTop': '', 'borderRight': '', 'borderBottom': '' });
+        if (left < right && left < top && left < bottom) {
+            return 'left';
+        }
+        if (top < left && top < right && top < bottom) {
+            return 'top';
+        }
+        if (right < left && right < top && right < bottom) {
+            return 'right';
+        }
+        if (bottom < left && bottom < top && bottom < right) {
+            return 'bottom';
+        }
+    }
+    ;
+    angular.module('tableLayout').directive('tableLayoutDrop', directive);
+})();
+//# sourceMappingURL=table-layout-drop.directive.js.map

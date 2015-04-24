@@ -1,0 +1,75 @@
+<!doctype html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7">
+<![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8">
+<![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9">
+<![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<head lang="en">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui"/>
+  <base href="/">
+  <title></title>
+  <!-- Provide default sizes specified for iOS7, other devices will scale as appropriate -->
+  <!-- Order is important and ensures it gracefully degrades along with compatibility of the device-->
+  <!-- The missing ‘sizes’ attribute in the last touch-icon ‘rel’ tag, ensures compatibility with older iPhones-->
+  <link rel="apple-touch-icon" sizes="152x152" href="icon-152x152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="icon-120x120.png" />
+  <link rel="apple-touch-icon" sizes="76x76" href="icon-76x76.png" />
+  <link rel="apple-touch-icon" href="icon-60x60.png" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <!-- build:css(client) app/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/angular-ui-grid/ui-grid.css" />
+  <!-- endbower -->
+  <!-- endbuild -->
+  <!-- build:css({.tmp,client}) app/app.css -->
+  <link rel="stylesheet" href=".css/app/app.css">
+  <!-- injector:css -->
+  <!-- endinjector -->
+  <!-- endbuild -->
+</head>
+<body ng-app="app">
+<ng-view></ng-view>
+<!-- build:js({client,node_modules}) app/vendor.js -->
+<!-- bower:js -->
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-nojq/angular-nojq.js"></script>
+<script src="bower_components/angular-route/angular-route.js"></script>
+<script src="bower_components/angular-ui-grid/ui-grid.js"></script>
+<script src="bower_components/lodash/lodash.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+<!-- build:js({.tmp,client}) app/app.js -->
+<!-- injector:js -->
+<script src=".js/.ts/components/table-layout/table-layout.template.html.js"></script>
+<script src=".js/.ts/app/trial/trial.template.html.js"></script>
+<script src=".js/.ts/app/app.template.html.js"></script>
+<script src=".js/app/trial/trial.module.js"></script>
+<script src=".js/app/app.core.module.js"></script>
+<script src=".js/app/app.module.js"></script>
+<script src=".js/app/app.config.js"></script>
+<script src=".js/app/app.controller.js"></script>
+<script src=".js/app/app.route.js"></script>
+<script src=".js/app/app.run.js"></script>
+<script src=".js/app/trial/trial.controller.js"></script>
+<script src=".js/components/drag-drop/drag-drop.module.js"></script>
+<script src=".js/components/drag-drop/drag-drop.service.js"></script>
+<script src=".js/components/drag-drop/draggable.directive.js"></script>
+<script src=".js/components/table-layout/table-layout.module.js"></script>
+<script src=".js/components/table-layout/table-layout-cell.directive.js"></script>
+<script src=".js/components/table-layout/table-layout-drop.directive.js"></script>
+<script src=".js/components/table-layout/table-layout.controller.js"></script>
+<script src=".js/components/table-layout/table-layout.directive.js"></script>
+<!-- endinjector -->
+<!-- endbuild -->
+</body>
+</html>
