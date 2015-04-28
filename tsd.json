@@ -6,16 +6,16 @@
   "bundle": "client/.tsd/tsd.d.ts",
   "installed": {
     "angularjs/angular.d.ts": {
-      "commit": "51d426745a1c0a88ca3234102f0a87ab3fcff334"
+      "commit": "00e7f3fede5f2df55b56c72f40a144824f0f0bfa"
     },
     "jquery/jquery.d.ts": {
-      "commit": "51d426745a1c0a88ca3234102f0a87ab3fcff334"
+      "commit": "00e7f3fede5f2df55b56c72f40a144824f0f0bfa"
     },
     "angularjs/angular-route.d.ts": {
-      "commit": "51d426745a1c0a88ca3234102f0a87ab3fcff334"
+      "commit": "00e7f3fede5f2df55b56c72f40a144824f0f0bfa"
     },
     "lodash/lodash.d.ts": {
-      "commit": "51d426745a1c0a88ca3234102f0a87ab3fcff334"
+      "commit": "00e7f3fede5f2df55b56c72f40a144824f0f0bfa"
     }
   }
 }

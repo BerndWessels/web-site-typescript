@@ -26,6 +26,7 @@ table-layout table {
 table-layout table > tbody > tr > td {
   padding: 0;
   border: 1px solid #ffffff;
+  vertical-align: top;
 }
 table-layout table > tbody > tr > td.drag-over-left {
   border-left: 1px solid red !important;
@@ -39,11 +40,14 @@ table-layout table > tbody > tr > td.drag-over-right {
 table-layout table > tbody > tr > td.drag-over-bottom {
   border-bottom: 1px solid red !important;
 }
+table-layout table > tbody > tr > td.drag-over-all {
+  border: 1px solid red !important;
+}
+table-layout table > tbody > tr > td.selected {
+  background-color: lightpink;
+}
 table-layout table > tbody > tr > td > table-layout-cell {
   display: block;
   overflow: hidden;
   min-height: 20px;
-}
-table-layout table > tbody > tr > td > table-layout-cell.selected {
-  background-color: lightpink;
 }

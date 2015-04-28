@@ -10,25 +10,29 @@ table-layout {
         > td {
           padding: 0;
           border: 1px solid #ffffff;
+          vertical-align: top;
           &.drag-over-left {
             border-left: 1px solid red !important;
           }
           &.drag-over-top {
-            border-top: 1px solid red !important;;
+            border-top: 1px solid red !important;
           }
           &.drag-over-right {
-            border-right: 1px solid red !important;;
+            border-right: 1px solid red !important;
           }
           &.drag-over-bottom {
-            border-bottom: 1px solid red !important;;
+            border-bottom: 1px solid red !important;
+          }
+          &.drag-over-all {
+            border: 1px solid red !important;
+          }
+          &.selected {
+            background-color: lightpink;
           }
           > table-layout-cell {
             display: block;
             overflow: hidden;
             min-height: 20px;
-            &.selected {
-              background-color: lightpink;
-            }
           }
         }
       }

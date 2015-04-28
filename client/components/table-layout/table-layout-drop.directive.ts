@@ -1,7 +1,8 @@
+/* tslint:disable:no-string-literal */
 ((): void => {
   'use strict';
-  directive.$inject = ['dragDropService'];
-  function directive(dragDropService: components.dragDrop.IDragDropService): ng.IDirective {
+  directive.$inject = ['$parse', 'dragDropService'];
+  function directive($parse: ng.IParseService, dragDropService: components.dragDrop.IDragDropService): ng.IDirective {
     return <ng.IDirective> {
       restrict: 'A',
       require: '^tableLayout',
@@ -13,45 +14,64 @@
                   controller: components.tableLayout.ITableLayoutController,
                   transclude: ng.ITranscludeFunction): void {
       instanceElement.on('dragenter', (eventObject: JQueryEventObject): any => {
+        if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+          return;
+        }
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
-          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
           event.preventDefault();
         }
       });
       instanceElement.on('dragover', (eventObject: JQueryEventObject): any => {
+        if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+          return;
+        }
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
-          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
-          var side: string = calcSide(instanceElement, eventObject);
-          switch (side) {
-            case 'left':
-              instanceElement.addClass('drag-over-left');
-              break;
-            case 'top':
-              instanceElement.addClass('drag-over-top');
-              break;
-            case 'right':
-              instanceElement.addClass('drag-over-right');
-              break;
-            case 'bottom':
-              instanceElement.addClass('drag-over-bottom');
-              break;
+          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
+          var tableRowIndex: number = (<any>scope).$parent.$index;
+          var tableColIndex: number = controller.colIndexToTableColIndex(tableRowIndex, (<any>scope).$index);
+          if (controller.layout.tableRows[tableRowIndex][tableColIndex]) {
+            var side: string = calcSide(instanceElement, eventObject);
+            switch (side) {
+              case 'left':
+                instanceElement.addClass('drag-over-left');
+                break;
+              case 'top':
+                instanceElement.addClass('drag-over-top');
+                break;
+              case 'right':
+                instanceElement.addClass('drag-over-right');
+                break;
+              case 'bottom':
+                instanceElement.addClass('drag-over-bottom');
+                break;
+            }
+            event.preventDefault();
+          } else {
+            instanceElement.addClass('drag-over-all');
+            event.preventDefault();
           }
-          event.preventDefault();
         }
       });
       instanceElement.on('dragleave', (eventObject: JQueryEventObject): any => {
+        if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+          return;
+        }
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
-          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
           event.preventDefault();
         }
       });
       instanceElement.on('drop', (eventObject: JQueryEventObject): any => {
+        if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+          return;
+        }
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
-          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+          instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
           var data: any = dragDropService.getData();
           var side: string = calcSide(instanceElement, eventObject);
           scope.$apply((): void => {
@@ -62,7 +82,7 @@
       });
       instanceElement.on('click', (eventObject: JQueryEventObject): any => {
         scope.$apply((): void => {
-          controller.layout.selectedCell = (<any>scope).cell;
+          controller.layout.selectedCell = angular.copy((<any>scope).cell);
         });
       });
     }

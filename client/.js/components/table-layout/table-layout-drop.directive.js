@@ -1,7 +1,8 @@
+/* tslint:disable:no-string-literal */
 (function () {
     'use strict';
-    directive.$inject = ['dragDropService'];
-    function directive(dragDropService) {
+    directive.$inject = ['$parse', 'dragDropService'];
+    function directive($parse, dragDropService) {
         return {
             restrict: 'A',
             require: '^tableLayout',
@@ -9,45 +10,65 @@
         };
         function link(scope, instanceElement, instanceAttributes, controller, transclude) {
             instanceElement.on('dragenter', function (eventObject) {
+                if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+                    return;
+                }
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
-                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
                     event.preventDefault();
                 }
             });
             instanceElement.on('dragover', function (eventObject) {
+                if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+                    return;
+                }
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
-                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
-                    var side = calcSide(instanceElement, eventObject);
-                    switch (side) {
-                        case 'left':
-                            instanceElement.addClass('drag-over-left');
-                            break;
-                        case 'top':
-                            instanceElement.addClass('drag-over-top');
-                            break;
-                        case 'right':
-                            instanceElement.addClass('drag-over-right');
-                            break;
-                        case 'bottom':
-                            instanceElement.addClass('drag-over-bottom');
-                            break;
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
+                    var tableRowIndex = scope.$parent.$index;
+                    var tableColIndex = controller.colIndexToTableColIndex(tableRowIndex, scope.$index);
+                    if (controller.layout.tableRows[tableRowIndex][tableColIndex]) {
+                        var side = calcSide(instanceElement, eventObject);
+                        switch (side) {
+                            case 'left':
+                                instanceElement.addClass('drag-over-left');
+                                break;
+                            case 'top':
+                                instanceElement.addClass('drag-over-top');
+                                break;
+                            case 'right':
+                                instanceElement.addClass('drag-over-right');
+                                break;
+                            case 'bottom':
+                                instanceElement.addClass('drag-over-bottom');
+                                break;
+                        }
+                        event.preventDefault();
                     }
-                    event.preventDefault();
+                    else {
+                        instanceElement.addClass('drag-over-all');
+                        event.preventDefault();
+                    }
                 }
             });
             instanceElement.on('dragleave', function (eventObject) {
+                if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+                    return;
+                }
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
-                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
                     event.preventDefault();
                 }
             });
             instanceElement.on('drop', function (eventObject) {
+                if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+                    return;
+                }
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
-                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom');
+                    instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
                     var data = dragDropService.getData();
                     var side = calcSide(instanceElement, eventObject);
                     scope.$apply(function () {
@@ -58,7 +79,7 @@
             });
             instanceElement.on('click', function (eventObject) {
                 scope.$apply(function () {
-                    controller.layout.selectedCell = scope.cell;
+                    controller.layout.selectedCell = angular.copy(scope.cell);
                 });
             });
         }

@@ -1,15 +1,28 @@
 (function () {
     'use strict';
-    directive.$inject = ['$timeout'];
-    function directive($timeout) {
+    directive.$inject = ['$compile', '$timeout'];
+    function directive($compile, $timeout) {
         return {
             restrict: 'EAC',
             require: '^tableLayout',
             scope: false,
-            link: link,
-            template: '<div>{{cell.id}}</div>'
+            link: link
         };
         function link(scope, instanceElement, instanceAttributes, controller, transclude) {
+            // watch the cell content.
+            scope.$watch(function () {
+                return scope.cell;
+            }, function (newValue, oldValue) {
+                if (newValue) {
+                    // render the cell template.
+                    instanceElement.html(newValue.template);
+                    $compile(instanceElement.contents())(controller.getTemplateScope());
+                }
+                else {
+                    // clear the cell content.
+                    instanceElement.html('');
+                }
+            });
             // triggered by an event outside of the angular world.
             scope.dragStart = function () {
                 // let the event finish before messing with the element that triggered it.

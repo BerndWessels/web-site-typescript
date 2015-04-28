@@ -6,9 +6,10 @@ module components.tableLayout {
     tableRows: number[][];
   }
   export interface ITableCell {
+    id: number;
+    template: string;
     rowSpan: number;
     colSpan: number;
-    id: number;
   }
   export interface ITableLayoutController {
     layout: ITableLayout;
@@ -16,17 +17,25 @@ module components.tableLayout {
     update(tableWidth: number): void;
     drop(rowIndex: number, colIndex: number, side: string, data: any): void;
     remove(tableCellId: number): void;
+    updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void;
+    getTableCell(id: number): ITableCell;
+    getTemplateScope(): ng.IScope;
+    colIndexToTableColIndex(tableRowIndex: number, colIndex: number): number;
   }
   class TableLayoutController implements ITableLayoutController {
-    static $inject: string[] = [];
+    static $inject: string[] = ['$scope'];
     layout: ITableLayout;
     rows: ITableCell[][];
     numCols: number;
     colWidth: number;
     tableWidth: number;
 
-    constructor() {
+    constructor(private $scope: ng.IScope) {
       console.log();
+    }
+
+    getTemplateScope(): ng.IScope {
+      return this.$scope.$parent;
     }
 
     getTableCell(id: number): ITableCell {
@@ -117,9 +126,7 @@ module components.tableLayout {
       }
     }
 
-    drop(tableRowIndex: number, colIndex: number, side: string, data: any): void {
-      // add the new table cell to the layout. todo: change id from number to timestamp.
-      this.layout.tableCells.push({rowSpan: 1, colSpan: 1, id: data});
+    colIndexToTableColIndex(tableRowIndex: number, colIndex: number): number {
       // transform the colIndex into a tableColIndex.
       var tableColIndex: number = 0;
       var x: number = 0;
@@ -136,106 +143,129 @@ module components.tableLayout {
         var tableCellId: number = this.layout.tableRows[tableRowIndex][tableColIndex];
         tableColIndex += tableCellId ? this.getTableCell(tableCellId).colSpan : 1;
       }
-      tableColIndex--;
-      // choose the algorithm for the drop side.
-      switch (side) {
-        case 'left':
-          // left align the drop position.
-          while (tableColIndex > 0 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
-          this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex][tableColIndex - 1]) {
-            tableColIndex--;
-          }
-          // check if we drop at the start.
-          if (tableColIndex === 0) {
-            // insert a new column before the drop column.
-            this.insertCol(tableColIndex);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex] = data;
-            // check if the cell at the drop position is not empty.
-          } else if (this.layout.tableRows[tableRowIndex][tableColIndex - 1] === null) {
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex - 1] = data;
-          } else {
-            // insert a new column before the drop column.
-            this.insertCol(tableColIndex);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex] = data;
-          }
-          break;
-        case 'right':
-          // check if we drop at the end.
-          if (tableColIndex === this.layout.tableRows[tableRowIndex].length) {
-            // append a new column after the drop column.
-            this.insertCol(tableColIndex + 1);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data;
-            // check if the cell at the drop position is not empty.
-          } else if (this.layout.tableRows[tableRowIndex][tableColIndex + 1] === null) {
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data;
-          } else {
-            // append a new column after the drop column.
-            this.insertCol(tableColIndex + 1);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data;
-          }
-          break;
-        case 'top':
-          // left align the drop position.
-          while (tableColIndex > 0 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
-          this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex][tableColIndex - 1]) {
-            tableColIndex--;
-          }
-          // check if we drop at the start.
-          if (tableRowIndex === 0) {
-            // insert a new row before the drop row.
-            this.insertRow(tableRowIndex);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex] = data;
-            // check if the cell at the drop position is not empty.
-          } else if (this.layout.tableRows[tableRowIndex - 1][tableColIndex] === null) {
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex - 1][tableColIndex] = data;
-          } else {
-            // insert a new row before the drop row.
-            this.insertRow(tableRowIndex);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex][tableColIndex] = data;
-          }
-          break;
-        case 'bottom':
-          // left align the drop position.
-          while (tableColIndex > 0 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
-          this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex][tableColIndex - 1]) {
-            tableColIndex--;
-          }
-          // bottom align the drop position.
-          while (tableRowIndex < this.layout.tableRows.length - 1 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
-          this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex + 1][tableColIndex]) {
-            tableRowIndex++;
-          }
-          // check if we drop at the end.
-          if (tableRowIndex === this.layout.tableRows.length - 1) {
-            // append a new row after the drop row.
-            this.insertRow(tableRowIndex + 1);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data;
-            // check if the cell at the drop position is not empty.
-          } else if (this.layout.tableRows[tableRowIndex + 1][tableColIndex] === null) {
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data;
-          } else {
-            // append a new row after the drop row.
-            this.insertRow(tableRowIndex + 1);
-            // set the new cell at the drop position.
-            this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data;
-          }
-          break;
+      return --tableColIndex;
+    }
+
+    drop(tableRowIndex: number, colIndex: number, side: string, data: any): void {
+      // add the new table cell to the layout. todo: change id from number to timestamp.
+      this.layout.tableCells.push({
+        id: data.id,
+        template: data.template,
+        rowSpan: 1,
+        colSpan: 1
+      });
+      // transform the colIndex into a tableColIndex.
+      var tableColIndex: number = this.colIndexToTableColIndex(tableRowIndex, colIndex);
+      // check if we are dropping onto an empty cell.
+      if (this.layout.tableRows[tableRowIndex][tableColIndex]) {
+        // choose the algorithm for the drop side.
+        switch (side) {
+          case 'left':
+            // left align the drop position.
+            while (tableColIndex > 0 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
+            this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex][tableColIndex - 1]) {
+              tableColIndex--;
+            }
+            // check if we drop at the start.
+            if (tableColIndex === 0) {
+              // insert a new column before the drop column.
+              this.insertCol(tableColIndex);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+              // check if the cell at the drop position is not empty.
+            } else if (this.layout.tableRows[tableRowIndex][tableColIndex - 1] === null) {
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex - 1] = data.id;
+            } else {
+              // insert a new column before the drop column.
+              this.insertCol(tableColIndex);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+            }
+            break;
+          case 'right':
+            // check if we drop at the end.
+            if (tableColIndex === this.layout.tableRows[tableRowIndex].length) {
+              // append a new column after the drop column.
+              this.insertCol(tableColIndex + 1);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+              // check if the cell at the drop position is not empty.
+            } else if (this.layout.tableRows[tableRowIndex][tableColIndex + 1] === null) {
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+            } else {
+              // append a new column after the drop column.
+              this.insertCol(tableColIndex + 1);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+            }
+            break;
+          case 'top':
+            // left align the drop position.
+            while (tableColIndex > 0 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
+            this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex][tableColIndex - 1]) {
+              tableColIndex--;
+            }
+            // check if we drop at the start.
+            if (tableRowIndex === 0) {
+              // insert a new row before the drop row.
+              this.insertRow(tableRowIndex);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+              // check if the cell at the drop position is not empty.
+            } else if (this.layout.tableRows[tableRowIndex - 1][tableColIndex] === null) {
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex - 1][tableColIndex] = data.id;
+            } else {
+              // insert a new row before the drop row.
+              this.insertRow(tableRowIndex);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+            }
+            break;
+          case 'bottom':
+            // left align the drop position.
+            while (tableColIndex > 0 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
+            this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex][tableColIndex - 1]) {
+              tableColIndex--;
+            }
+            // bottom align the drop position.
+            while (tableRowIndex < this.layout.tableRows.length - 1 && this.layout.tableRows[tableRowIndex][tableColIndex] !== null &&
+            this.layout.tableRows[tableRowIndex][tableColIndex] === this.layout.tableRows[tableRowIndex + 1][tableColIndex]) {
+              tableRowIndex++;
+            }
+            // check if we drop at the end.
+            if (tableRowIndex === this.layout.tableRows.length - 1) {
+              // append a new row after the drop row.
+              this.insertRow(tableRowIndex + 1);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+              // check if the cell at the drop position is not empty.
+            } else if (this.layout.tableRows[tableRowIndex + 1][tableColIndex] === null) {
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+            } else {
+              // append a new row after the drop row.
+              this.insertRow(tableRowIndex + 1);
+              // set the new cell at the drop position.
+              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+            }
+            break;
+        }
+      } else {
+        this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
       }
       this.update(this.tableWidth);
     }
 
     remove(tableCellId: number): void {
+      var tableCell: ITableCell = this.getTableCell(tableCellId);
+      tableCell.colSpan = 1;
+      tableCell.rowSpan = 1;
+      if (this.layout.selectedCell && this.layout.selectedCell.id === tableCell.id) {
+        this.layout.selectedCell = null;
+      }
       this.layout.tableRows.forEach((tableRow: number[]): void => {
         tableRow.forEach((id: number, x: number): void => {
           if (tableCellId === id) {
@@ -272,14 +302,64 @@ module components.tableLayout {
           removeCols.push(x);
         }
       }, this);
+      removeRows.reverse();
       removeRows.forEach((y: number): void => {
         this.layout.tableRows.splice(y, 1);
-      });
+      }, this);
+      removeCols.reverse();
       removeCols.forEach((x: number): void => {
         this.layout.tableRows.forEach((tableRow: number[]): void => {
           tableRow.splice(x, 1);
         }, this);
-      });
+      }, this);
+    }
+
+    updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void {
+      var tableCell: ITableCell = this.getTableCell(this.layout.selectedCell.id);
+      tableCell.colSpan += diffColSpan;
+      tableCell.rowSpan += diffRowSpan;
+      var tableColIndex: number = null;
+      var tableRowIndex: number = null;
+      this.layout.tableRows.forEach((tableRow: number[], y: number): void => {
+        tableRow.forEach((id: number, x: number): void => {
+          if (id === tableCell.id) {
+            tableColIndex = tableColIndex === null ? x : tableColIndex;
+            tableRowIndex = tableRowIndex === null ? y : tableRowIndex;
+          }
+        }, this);
+      }, this);
+      while (diffRowSpan > 0) {
+        diffRowSpan--;
+        var yInsertIndex: number = tableRowIndex + this.layout.selectedCell.rowSpan - diffRowSpan - 1;
+        this.insertRow(yInsertIndex);
+        for (var xInsert: number = 0; xInsert < tableCell.colSpan; xInsert++) {
+          this.layout.tableRows[yInsertIndex][tableColIndex + xInsert] = tableCell.id;
+        }
+      }
+      while (diffColSpan > 0) {
+        diffColSpan--;
+        var xInsertIndex: number = tableColIndex + this.layout.selectedCell.colSpan - diffColSpan - 1;
+        this.insertCol(xInsertIndex);
+        for (var yInsert: number = 0; yInsert < tableCell.rowSpan; yInsert++) {
+          this.layout.tableRows[tableRowIndex + yInsert][xInsertIndex] = tableCell.id;
+        }
+      }
+      while (diffRowSpan < 0) {
+        diffRowSpan++;
+        var yRemoveIndex: number = tableRowIndex + this.layout.selectedCell.rowSpan - diffRowSpan;
+        for (var xRemove: number = 0; xRemove < tableCell.colSpan; xRemove++) {
+          this.layout.tableRows[yRemoveIndex][tableColIndex + xRemove] = null;
+        }
+        this.compact();
+      }
+      while (diffColSpan < 0) {
+        diffColSpan++;
+        var xRemoveIndex: number = tableColIndex + this.layout.selectedCell.colSpan - diffColSpan;
+        for (var yRemove: number = 0; yRemove < tableCell.rowSpan; yRemove++) {
+          this.layout.tableRows[tableRowIndex + yRemove][xRemoveIndex] = null;
+        }
+        this.compact();
+      }
     }
   }
 

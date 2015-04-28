@@ -4,23 +4,23 @@ var app;
     (function (trial) {
         'use strict';
         var TrialController = (function () {
-            function TrialController() {
+            function TrialController($scope) {
                 var vm = this;
                 vm.name = 'Trial';
                 vm.tableLayout = {
                     selectedCell: null,
                     tableCells: [
-                        { rowSpan: 1, colSpan: 1, id: 11 },
-                        { rowSpan: 1, colSpan: 1, id: 13 },
-                        { rowSpan: 1, colSpan: 1, id: 14 },
-                        { rowSpan: 1, colSpan: 1, id: 21 },
-                        { rowSpan: 3, colSpan: 2, id: 22 },
-                        { rowSpan: 1, colSpan: 1, id: 31 },
-                        { rowSpan: 1, colSpan: 1, id: 34 },
-                        { rowSpan: 1, colSpan: 1, id: 44 },
-                        { rowSpan: 1, colSpan: 1, id: 51 },
-                        { rowSpan: 1, colSpan: 1, id: 53 },
-                        { rowSpan: 1, colSpan: 1, id: 54 }
+                        { rowSpan: 1, colSpan: 1, id: 11, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 13, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 14, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 21, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 3, colSpan: 2, id: 22, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 31, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 34, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 44, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 51, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 53, template: '<div>{{vm.name}}</div>' },
+                        { rowSpan: 1, colSpan: 1, id: 54, template: '<div>{{vm.name}}</div>' }
                     ],
                     tableRows: [
                         [11, null, 13, 14],
@@ -30,9 +30,13 @@ var app;
                         [51, null, 53, 54]
                     ]
                 };
-                vm.outers = [{ name: 'a' }, { name: 'b' }, { name: 'c' }, { name: 'd' }, { name: 'e' }, { name: 'f' }];
+                vm.outers = [
+                    { id: 'a', template: '<div>a - {{vm.name}}</div>' },
+                    { id: 'b', template: '<div>b - {{vm.name}}</div>' },
+                    { id: 'c', template: '<div>c - {{vm.name}}</div>' }
+                ];
             }
-            TrialController.$inject = [];
+            TrialController.$inject = ['$scope'];
             return TrialController;
         })();
         trial.TrialController = TrialController;

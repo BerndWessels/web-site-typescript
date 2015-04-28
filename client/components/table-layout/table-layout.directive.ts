@@ -19,12 +19,23 @@
                   controller: components.tableLayout.ITableLayoutController,
                   transclude: ng.ITranscludeFunction): void {
       scope.$watch((): any => {
-        return controller.layout.toString(); // todo: split to distingish between selectedCell change and other changes.
+        return controller.layout.tableRows.toString();
       }, (newValue: any, oldValue: any) => {
         if (newValue) {
           controller.update(instanceElement.innerWidth());
         }
       });
+      scope.$watch((): any => {
+        return controller.layout.selectedCell;
+      }, (newValue: any, oldValue: any) => {
+        if (newValue && oldValue && newValue.id === oldValue.id && newValue.colSpan && newValue.rowSpan) {
+          var tableCell: components.tableLayout.ITableCell = controller.getTableCell(newValue.id);
+          controller.updateSelectedSpan(
+            newValue.colSpan - tableCell.colSpan,
+            newValue.rowSpan - tableCell.rowSpan
+          );
+        }
+      }, true);
       scope.$watch((): any => {
         return instanceElement.innerWidth();
       }, (newValue: any, oldValue: any) => {
