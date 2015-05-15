@@ -1,31 +1,47 @@
 module components.tableLayout {
   'use strict';
   export interface ITableLayout {
+    cellType: string;
     selectedCell: ITableCell;
     tableCells: ITableCell[];
     tableRows: number[][];
   }
   export interface ITableCell {
     id: number;
-    template: string;
+    content: ITableCellContent;
     rowSpan: number;
     colSpan: number;
+  }
+  export interface ITableCellContent {
+    id: number;
+    template: string;
+    data: any;
   }
   export interface ITableLayoutController {
     layout: ITableLayout;
     rows: ITableCell[][];
+    selectCell: (layout: ITableLayout, cell: ITableCell) => boolean;
+    allowContent: (layout: ITableLayout, content: ITableCellContent) => boolean;
+    addedContent: (layout: ITableLayout, cell: ITableCell) => void;
+    removedContent: (layout: ITableLayout, cell: ITableCell) => void;
     update(tableWidth: number): void;
     drop(rowIndex: number, colIndex: number, side: string, data: any): void;
     remove(tableCellId: number): void;
     updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void;
     getTableCell(id: number): ITableCell;
     getTemplateScope(): ng.IScope;
+    compileCellTemplate(element: JQuery): void;
     colIndexToTableColIndex(tableRowIndex: number, colIndex: number): number;
   }
   class TableLayoutController implements ITableLayoutController {
     static $inject: string[] = ['$scope'];
     layout: ITableLayout;
     rows: ITableCell[][];
+    selectCell: (layout: ITableLayout, cell: ITableCell) => boolean;
+    allowContent: (layout: ITableLayout, content: ITableCellContent) => boolean;
+    addedContent: (layout: ITableLayout, cell: ITableCell) => void;
+    removedContent: (layout: ITableLayout, cell: ITableCell) => void;
+    compileCellTemplate: (element: JQuery) => void;
     numCols: number;
     colWidth: number;
     tableWidth: number;
@@ -46,6 +62,9 @@ module components.tableLayout {
 
     update(tableWidth: number): void {
       if (tableWidth <= 0) {
+        return;
+      }
+      if (!this.layout) {
         return;
       }
       this.tableWidth = tableWidth;
@@ -146,14 +165,19 @@ module components.tableLayout {
       return --tableColIndex;
     }
 
-    drop(tableRowIndex: number, colIndex: number, side: string, data: any): void {
+    drop(tableRowIndex: number, colIndex: number, side: string, content: any): void {
       // add the new table cell to the layout. todo: change id from number to timestamp.
-      this.layout.tableCells.push({
-        id: data.id,
-        template: data.template,
+      var newCell: ITableCell = {
+        id: new Date().getTime(),
+        content: content,
         rowSpan: 1,
         colSpan: 1
-      });
+      };
+      this.layout.tableCells.push(newCell);
+      // add it to the used fields if possible.
+      if (this.addedContent) {
+        this.addedContent(this.layout, newCell);
+      }
       // transform the colIndex into a tableColIndex.
       var tableColIndex: number = this.colIndexToTableColIndex(tableRowIndex, colIndex);
       // check if we are dropping onto an empty cell.
@@ -171,16 +195,16 @@ module components.tableLayout {
               // insert a new column before the drop column.
               this.insertCol(tableColIndex);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
               // check if the cell at the drop position is not empty.
             } else if (this.layout.tableRows[tableRowIndex][tableColIndex - 1] === null) {
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex - 1] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex - 1] = newCell.id;
             } else {
               // insert a new column before the drop column.
               this.insertCol(tableColIndex);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
             }
             break;
           case 'right':
@@ -189,16 +213,16 @@ module components.tableLayout {
               // append a new column after the drop column.
               this.insertCol(tableColIndex + 1);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = newCell.id;
               // check if the cell at the drop position is not empty.
             } else if (this.layout.tableRows[tableRowIndex][tableColIndex + 1] === null) {
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = newCell.id;
             } else {
               // append a new column after the drop column.
               this.insertCol(tableColIndex + 1);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex + 1] = newCell.id;
             }
             break;
           case 'top':
@@ -212,16 +236,16 @@ module components.tableLayout {
               // insert a new row before the drop row.
               this.insertRow(tableRowIndex);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
               // check if the cell at the drop position is not empty.
             } else if (this.layout.tableRows[tableRowIndex - 1][tableColIndex] === null) {
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex - 1][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex - 1][tableColIndex] = newCell.id;
             } else {
               // insert a new row before the drop row.
               this.insertRow(tableRowIndex);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
             }
             break;
           case 'bottom':
@@ -240,21 +264,21 @@ module components.tableLayout {
               // append a new row after the drop row.
               this.insertRow(tableRowIndex + 1);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = newCell.id;
               // check if the cell at the drop position is not empty.
             } else if (this.layout.tableRows[tableRowIndex + 1][tableColIndex] === null) {
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = newCell.id;
             } else {
               // append a new row after the drop row.
               this.insertRow(tableRowIndex + 1);
               // set the new cell at the drop position.
-              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+              this.layout.tableRows[tableRowIndex + 1][tableColIndex] = newCell.id;
             }
             break;
         }
       } else {
-        this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+        this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
       }
       this.update(this.tableWidth);
     }
@@ -273,6 +297,13 @@ module components.tableLayout {
           }
         }, this);
       }, this);
+      _.remove(this.layout.tableCells, (cell: ITableCell): boolean => {
+        return cell.id === tableCellId;
+      });
+      // remove it from the used fields if possible.
+      if (this.removedContent) {
+        this.removedContent(this.layout, tableCell);
+      }
       this.compact();
       this.update(this.tableWidth);
     }
@@ -312,6 +343,9 @@ module components.tableLayout {
           tableRow.splice(x, 1);
         }, this);
       }, this);
+      if (this.layout.tableRows.length === 0) {
+        this.layout.tableRows.push([null]);
+      }
     }
 
     updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void {

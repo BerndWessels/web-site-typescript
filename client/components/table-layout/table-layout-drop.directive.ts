@@ -17,14 +17,22 @@
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
           return;
         }
+        var data: components.tableLayout.ITableCellContent = dragDropService.getData();
+        if (controller.allowContent(controller.layout, data)) {
+          return;
+        }
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
           instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
-          event.preventDefault();
+          dragEvent.preventDefault();
         }
       });
       instanceElement.on('dragover', (eventObject: JQueryEventObject): any => {
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+          return;
+        }
+        var data: any = dragDropService.getData();
+        if (controller.allowContent(controller.layout, data)) {
           return;
         }
         var dragEvent: DragEvent = <any> eventObject;
@@ -48,42 +56,53 @@
                 instanceElement.addClass('drag-over-bottom');
                 break;
             }
-            event.preventDefault();
+            dragEvent.preventDefault();
           } else {
             instanceElement.addClass('drag-over-all');
-            event.preventDefault();
+            dragEvent.preventDefault();
           }
         }
       });
+      var data: components.tableLayout.ITableCellContent;
       instanceElement.on('dragleave', (eventObject: JQueryEventObject): any => {
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+          return;
+        }
+        data = dragDropService.getData();
+        if (controller.allowContent(controller.layout, data)) {
           return;
         }
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
           instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
-          event.preventDefault();
+          dragEvent.preventDefault();
         }
       });
       instanceElement.on('drop', (eventObject: JQueryEventObject): any => {
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
           return;
         }
+        data = dragDropService.getData();
+        if (controller.allowContent(controller.layout, data)) {
+          return;
+        }
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
           instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
-          var data: any = dragDropService.getData();
+          data = dragDropService.getData();
           var side: string = calcSide(instanceElement, eventObject);
           scope.$apply((): void => {
             controller.drop((<any>scope).$parent.$index, (<any>scope).$index, side, data);
           });
-          event.preventDefault();
+          dragEvent.preventDefault();
         }
       });
       instanceElement.on('click', (eventObject: JQueryEventObject): any => {
         scope.$apply((): void => {
           controller.layout.selectedCell = angular.copy((<any>scope).cell);
         });
+        eventObject.preventDefault();
+        eventObject.stopPropagation();
       });
     }
   }

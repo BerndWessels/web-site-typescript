@@ -7,7 +7,6 @@
       require: '^tableLayout',
       scope: false,
       link: link
-      // template: '<div>{{cell.id}}</div>'
     };
     function link(scope: ng.IScope,
                   instanceElement: ng.IAugmentedJQuery,
@@ -20,8 +19,12 @@
       }, (newValue: components.tableLayout.ITableCell, oldValue: components.tableLayout.ITableCell): void => {
         if (newValue) {
           // render the cell template.
-          instanceElement.html(newValue.template);
-          $compile(instanceElement.contents())(controller.getTemplateScope());
+          instanceElement.html(newValue.content.template);
+          if (controller.compileCellTemplate) {
+            controller.compileCellTemplate(instanceElement.contents());
+          } else {
+            $compile(instanceElement.contents())(scope);
+          }
         } else {
           // clear the cell content.
           instanceElement.html('');

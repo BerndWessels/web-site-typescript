@@ -5,7 +5,12 @@
         return {
             restrict: 'EAC',
             scope: {
-                layout: '='
+                layout: '=',
+                compileCellTemplate: '=',
+                selectCell: '=',
+                allowContent: '=',
+                addedContent: '=',
+                removedContent: '='
             },
             bindToController: true,
             link: link,
@@ -15,14 +20,14 @@
         };
         function link(scope, instanceElement, instanceAttributes, controller, transclude) {
             scope.$watch(function () {
-                return controller.layout.tableRows.toString();
+                return controller.layout ? controller.layout.tableRows.toString() : null;
             }, function (newValue, oldValue) {
                 if (newValue) {
                     controller.update(instanceElement.innerWidth());
                 }
             });
             scope.$watch(function () {
-                return controller.layout.selectedCell;
+                return controller.layout ? controller.layout.selectedCell : null;
             }, function (newValue, oldValue) {
                 if (newValue && oldValue && newValue.id === oldValue.id && newValue.colSpan && newValue.rowSpan) {
                     var tableCell = controller.getTableCell(newValue.id);

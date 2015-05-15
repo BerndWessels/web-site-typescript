@@ -4,39 +4,96 @@ var app;
     (function (trial) {
         'use strict';
         var TrialController = (function () {
-            function TrialController($scope) {
+            function TrialController($scope, $compile) {
+                var _this = this;
+                this.$scope = $scope;
+                this.$compile = $compile;
                 var vm = this;
-                vm.name = 'Trial';
-                vm.tableLayout = {
-                    selectedCell: null,
-                    tableCells: [
-                        { rowSpan: 1, colSpan: 1, id: 11, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 13, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 14, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 21, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 3, colSpan: 2, id: 22, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 31, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 34, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 44, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 51, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 53, template: '<div>{{vm.name}}</div>' },
-                        { rowSpan: 1, colSpan: 1, id: 54, template: '<div>{{vm.name}}</div>' }
-                    ],
-                    tableRows: [
-                        [11, null, 13, 14],
-                        [21, 22, 22, null],
-                        [31, 22, 22, 34],
-                        [null, 22, 22, 44],
-                        [51, null, 53, 54]
-                    ]
+                vm.name = 'Bernd';
+                // vm.compileTableLayoutCellTemplate = (element: JQuery): void => {
+                //   $compile(element)($scope);
+                // };
+                vm.selectCell = function (layout, cell) {
+                    return false; // todo return void and select in here!
                 };
-                vm.outers = [
-                    { id: 'a', template: '<div>a - {{vm.name}}</div>' },
-                    { id: 'b', template: '<div>b - {{vm.name}}</div>' },
-                    { id: 'c', template: '<div>c - {{vm.name}}</div>' }
+                vm.allowContent = function (layout, content) {
+                    if (layout.cellType === 'field') {
+                        return false;
+                    }
+                    return _.some(vm.usedFields, function (usedField) {
+                        return usedField.id === content.id && usedField.type === layout.cellType;
+                    });
+                };
+                vm.addedContent = function (layout, cell) {
+                    if (layout.cellType === 'fieldset') {
+                        var fieldSet = _.find(vm.fieldSets, { id: cell.content.id });
+                        if (fieldSet) {
+                            _.forEach(fieldSet.data.layout.tableCells, function (tableCell) {
+                                vm.usedFields.push({ id: tableCell.content.id, type: 'field' });
+                            });
+                        }
+                    }
+                    if (!_this.allowContent(layout, cell.content)) {
+                        vm.usedFields.push({ id: cell.content.id, type: layout.cellType });
+                    }
+                };
+                vm.removedContent = function (layout, cell) {
+                    if (layout.cellType === 'fieldset') {
+                        var fieldSet = _.find(vm.fieldSets, { id: cell.content.id });
+                        if (fieldSet) {
+                            _.forEach(fieldSet.data.layout.tableCells, function (tableCell) {
+                                vm.usedFields = _.without(vm.usedFields, _.findWhere(vm.usedFields, {
+                                    id: tableCell.content.id,
+                                    type: fieldSet.data.layout.cellType
+                                }));
+                            });
+                        }
+                    }
+                    vm.usedFields = _.without(vm.usedFields, _.findWhere(vm.usedFields, {
+                        id: cell.content.id,
+                        type: layout.cellType
+                    }));
+                };
+                vm.usedFields = [];
+                vm.loadTableLayout();
+                vm.name = 'Trial';
+                vm.fieldSets = [
+                    {
+                        id: 1,
+                        template: components.formLayout.fieldsetTemplate,
+                        data: { legend: 'One', layout: vm.getEmptyTableLayout() }
+                    },
+                    {
+                        id: 2,
+                        template: components.formLayout.fieldsetTemplate,
+                        data: { legend: 'Two', layout: vm.getEmptyTableLayout() }
+                    }
+                ];
+                vm.fields = [
+                    { id: 1, template: components.formLayout.fieldTemplate, data: { label: 'Een', value: 'Eins' } },
+                    { id: 2, template: components.formLayout.fieldTemplate, data: { label: 'Twe', value: 'Zwei' } }
                 ];
             }
-            TrialController.$inject = ['$scope'];
+            TrialController.prototype.getEmptyTableLayout = function () {
+                return {
+                    cellType: 'field',
+                    selectedCell: null,
+                    tableCells: [],
+                    tableRows: [[null]]
+                };
+            };
+            TrialController.prototype.loadTableLayout = function () {
+                this.tableLayout = {
+                    cellType: 'fieldset',
+                    selectedCell: null,
+                    tableCells: [
+                    ],
+                    tableRows: [
+                        [null]
+                    ]
+                };
+            };
+            TrialController.$inject = ['$scope', '$compile'];
             return TrialController;
         })();
         trial.TrialController = TrialController;

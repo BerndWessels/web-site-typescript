@@ -21,6 +21,9 @@ var components;
                 if (tableWidth <= 0) {
                     return;
                 }
+                if (!this.layout) {
+                    return;
+                }
                 this.tableWidth = tableWidth;
                 this.rows = [];
                 var renderedCells = [];
@@ -115,14 +118,19 @@ var components;
                 }
                 return --tableColIndex;
             };
-            TableLayoutController.prototype.drop = function (tableRowIndex, colIndex, side, data) {
+            TableLayoutController.prototype.drop = function (tableRowIndex, colIndex, side, content) {
                 // add the new table cell to the layout. todo: change id from number to timestamp.
-                this.layout.tableCells.push({
-                    id: data.id,
-                    template: data.template,
+                var newCell = {
+                    id: new Date().getTime(),
+                    content: content,
                     rowSpan: 1,
                     colSpan: 1
-                });
+                };
+                this.layout.tableCells.push(newCell);
+                // add it to the used fields if possible.
+                if (this.addedContent) {
+                    this.addedContent(this.layout, newCell);
+                }
                 // transform the colIndex into a tableColIndex.
                 var tableColIndex = this.colIndexToTableColIndex(tableRowIndex, colIndex);
                 // check if we are dropping onto an empty cell.
@@ -137,17 +145,17 @@ var components;
                                 // insert a new column before the drop column.
                                 this.insertCol(tableColIndex);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
                             }
                             else if (this.layout.tableRows[tableRowIndex][tableColIndex - 1] === null) {
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex - 1] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex - 1] = newCell.id;
                             }
                             else {
                                 // insert a new column before the drop column.
                                 this.insertCol(tableColIndex);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
                             }
                             break;
                         case 'right':
@@ -156,17 +164,17 @@ var components;
                                 // append a new column after the drop column.
                                 this.insertCol(tableColIndex + 1);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex + 1] = newCell.id;
                             }
                             else if (this.layout.tableRows[tableRowIndex][tableColIndex + 1] === null) {
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex + 1] = newCell.id;
                             }
                             else {
                                 // append a new column after the drop column.
                                 this.insertCol(tableColIndex + 1);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex + 1] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex + 1] = newCell.id;
                             }
                             break;
                         case 'top':
@@ -178,17 +186,17 @@ var components;
                                 // insert a new row before the drop row.
                                 this.insertRow(tableRowIndex);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
                             }
                             else if (this.layout.tableRows[tableRowIndex - 1][tableColIndex] === null) {
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex - 1][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex - 1][tableColIndex] = newCell.id;
                             }
                             else {
                                 // insert a new row before the drop row.
                                 this.insertRow(tableRowIndex);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
                             }
                             break;
                         case 'bottom':
@@ -203,23 +211,23 @@ var components;
                                 // append a new row after the drop row.
                                 this.insertRow(tableRowIndex + 1);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex + 1][tableColIndex] = newCell.id;
                             }
                             else if (this.layout.tableRows[tableRowIndex + 1][tableColIndex] === null) {
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex + 1][tableColIndex] = newCell.id;
                             }
                             else {
                                 // append a new row after the drop row.
                                 this.insertRow(tableRowIndex + 1);
                                 // set the new cell at the drop position.
-                                this.layout.tableRows[tableRowIndex + 1][tableColIndex] = data.id;
+                                this.layout.tableRows[tableRowIndex + 1][tableColIndex] = newCell.id;
                             }
                             break;
                     }
                 }
                 else {
-                    this.layout.tableRows[tableRowIndex][tableColIndex] = data.id;
+                    this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
                 }
                 this.update(this.tableWidth);
             };
@@ -238,6 +246,13 @@ var components;
                         }
                     }, _this);
                 }, this);
+                _.remove(this.layout.tableCells, function (cell) {
+                    return cell.id === tableCellId;
+                });
+                // remove it from the used fields if possible.
+                if (this.removedContent) {
+                    this.removedContent(this.layout, tableCell);
+                }
                 this.compact();
                 this.update(this.tableWidth);
             };
@@ -277,6 +292,9 @@ var components;
                         tableRow.splice(x, 1);
                     }, _this);
                 }, this);
+                if (this.layout.tableRows.length === 0) {
+                    this.layout.tableRows.push([null]);
+                }
             };
             TableLayoutController.prototype.updateSelectedSpan = function (diffColSpan, diffRowSpan) {
                 var _this = this;

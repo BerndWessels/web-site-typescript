@@ -25,7 +25,7 @@
         if (dragStart) {
           dragStart(dragEffect, dragType, dragData, instanceElement);
         }
-        event.stopPropagation();
+        eventObject.stopPropagation();
         return false;
       });
       instanceElement.on('dragend', (eventObject: JQueryEventObject): any => {
@@ -39,7 +39,7 @@
         if (dragEnd) {
           dragEnd(dragEffect, dragType, dragData, instanceElement);
         }
-        event.stopPropagation();
+        eventObject.stopPropagation();
         return false;
       });
     }

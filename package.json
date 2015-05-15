@@ -32,7 +32,7 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-env": "^0.4.4",
     "grunt-express-server": "^0.5.1",
-    "grunt-html2ts": "0.0.3",
+    "grunt-html2ts": "^0.0.4",
     "grunt-injector": "^0.6.0",
     "grunt-open": "^0.2.3",
     "grunt-rev": "^0.1.0",

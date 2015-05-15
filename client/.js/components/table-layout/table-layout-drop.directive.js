@@ -13,14 +13,22 @@
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
                     return;
                 }
+                var data = dragDropService.getData();
+                if (controller.allowContent(controller.layout, data)) {
+                    return;
+                }
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
                     instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
-                    event.preventDefault();
+                    dragEvent.preventDefault();
                 }
             });
             instanceElement.on('dragover', function (eventObject) {
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+                    return;
+                }
+                var data = dragDropService.getData();
+                if (controller.allowContent(controller.layout, data)) {
                     return;
                 }
                 var dragEvent = eventObject;
@@ -44,43 +52,54 @@
                                 instanceElement.addClass('drag-over-bottom');
                                 break;
                         }
-                        event.preventDefault();
+                        dragEvent.preventDefault();
                     }
                     else {
                         instanceElement.addClass('drag-over-all');
-                        event.preventDefault();
+                        dragEvent.preventDefault();
                     }
                 }
             });
+            var data;
             instanceElement.on('dragleave', function (eventObject) {
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
+                    return;
+                }
+                data = dragDropService.getData();
+                if (controller.allowContent(controller.layout, data)) {
                     return;
                 }
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
                     instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
-                    event.preventDefault();
+                    dragEvent.preventDefault();
                 }
             });
             instanceElement.on('drop', function (eventObject) {
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
                     return;
                 }
+                data = dragDropService.getData();
+                if (controller.allowContent(controller.layout, data)) {
+                    return;
+                }
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
                     instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
-                    var data = dragDropService.getData();
+                    data = dragDropService.getData();
                     var side = calcSide(instanceElement, eventObject);
                     scope.$apply(function () {
                         controller.drop(scope.$parent.$index, scope.$index, side, data);
                     });
-                    event.preventDefault();
+                    dragEvent.preventDefault();
                 }
             });
             instanceElement.on('click', function (eventObject) {
                 scope.$apply(function () {
                     controller.layout.selectedCell = angular.copy(scope.cell);
                 });
+                eventObject.preventDefault();
+                eventObject.stopPropagation();
             });
         }
     }

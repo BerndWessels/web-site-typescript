@@ -22,7 +22,7 @@
                 if (dragStart) {
                     dragStart(dragEffect, dragType, dragData, instanceElement);
                 }
-                event.stopPropagation();
+                eventObject.stopPropagation();
                 return false;
             });
             instanceElement.on('dragend', function (eventObject) {
@@ -35,7 +35,7 @@
                 if (dragEnd) {
                     dragEnd(dragEffect, dragType, dragData, instanceElement);
                 }
-                event.stopPropagation();
+                eventObject.stopPropagation();
                 return false;
             });
         }

@@ -5,7 +5,12 @@
     return <ng.IDirective> {
       restrict: 'EAC',
       scope: {
-        layout: '='
+        layout: '=',
+        compileCellTemplate: '=',
+        selectCell: '=',
+        allowContent: '=',
+        addedContent: '=',
+        removedContent: '='
       },
       bindToController: true,
       link: link,
@@ -19,14 +24,14 @@
                   controller: components.tableLayout.ITableLayoutController,
                   transclude: ng.ITranscludeFunction): void {
       scope.$watch((): any => {
-        return controller.layout.tableRows.toString();
+        return controller.layout ? controller.layout.tableRows.toString() : null;
       }, (newValue: any, oldValue: any) => {
         if (newValue) {
           controller.update(instanceElement.innerWidth());
         }
       });
       scope.$watch((): any => {
-        return controller.layout.selectedCell;
+        return controller.layout ? controller.layout.selectedCell : null;
       }, (newValue: any, oldValue: any) => {
         if (newValue && oldValue && newValue.id === oldValue.id && newValue.colSpan && newValue.rowSpan) {
           var tableCell: components.tableLayout.ITableCell = controller.getTableCell(newValue.id);

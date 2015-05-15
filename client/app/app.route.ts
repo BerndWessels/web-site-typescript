@@ -12,7 +12,7 @@
       '/trial', {
         template: app.trial.trialTemplate,
         controller: app.trial.TrialController,
-        controllerAs: 'vm'
+        controllerAs: 'trialCtrl'
       }
     );
   }
