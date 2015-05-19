@@ -5,7 +5,7 @@
         ng-class="{selected: cell !== null && cell.id === vm.layout.selectedCell.id}"
         table-layout-drop="vm.layout.cellType">
       <table-layout-cell ng-style="{'width': cell ? (cell.colSpan * vm.colWidth) + (cell.colSpan - 1) : vm.colWidth}"
-                         draggable="true" drag-start="dragStart" drag-effect="'move'" drag-type="vm.layout.cellType"
+                         draggable="{{vm.editMode}}" drag-start="dragStart" drag-effect="'move'" drag-type="vm.layout.cellType"
                          drag-data="cell.content"></table-layout-cell>
     </td>
   </tr>
