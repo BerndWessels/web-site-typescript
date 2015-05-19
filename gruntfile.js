@@ -444,7 +444,9 @@ module.exports = function (grunt) {
         },
         livereload: {
           files: [
-            '<%= cfg.client %>/**/*.*'
+            '<%= cfg.client %>/index.html',
+            '<%= cfg.client %>/.css/**/*.css',
+            '<%= cfg.client %>/.js/**/*.js'
           ],
           options: {
             livereload: {
