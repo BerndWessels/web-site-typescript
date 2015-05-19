@@ -6,14 +6,16 @@ module app.trial {
   }
   export interface ITrialController {
     name: string;
+    editMode: boolean;
     tableLayout: components.tableLayout.ITableLayout;
     fieldSets: components.tableLayout.ITableCellContent[];
     fields: components.tableLayout.ITableCellContent[];
     usedFields: IUsedField[];
+    selectedCell: components.tableLayout.ITableCell;
     loadTableLayout(): void;
     getEmptyTableLayout(): components.tableLayout.ITableLayout;
     compileTableLayoutCellTemplate(element: JQuery): void;
-    selectCell(layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell): boolean;
+    selectCell(layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell): void;
     allowContent(layout: components.tableLayout.ITableLayout, content: components.tableLayout.ITableCellContent): boolean;
     addedContent(layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell): void;
     removedContent(layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell): void;
@@ -21,12 +23,14 @@ module app.trial {
   export class TrialController implements ITrialController {
     static $inject: string[] = ['$scope', '$compile'];
     name: string;
+    editMode: boolean = true;
     tableLayout: components.tableLayout.ITableLayout;
     fieldSets: components.tableLayout.ITableCellContent[];
     fields: components.tableLayout.ITableCellContent[];
     usedFields: IUsedField[];
+    selectedCell: components.tableLayout.ITableCell;
     compileTableLayoutCellTemplate: (element: JQuery) => void;
-    selectCell: (layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell) => boolean;
+    selectCell: (layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell) => void;
     allowContent: (layout: components.tableLayout.ITableLayout, content: components.tableLayout.ITableCellContent) => boolean;
     addedContent: (layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell) => void;
     removedContent: (layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell) => void;
@@ -36,14 +40,24 @@ module app.trial {
 
       vm.name = 'Bernd';
 
-      // vm.compileTableLayoutCellTemplate = (element: JQuery): void => {
-      //   $compile(element)($scope);
-      // };
-        vm.selectCell = (layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell): boolean => {
-          return false; // todo return void and select in here!
-        };
+      // todo: not used in this case.
+      vm.compileTableLayoutCellTemplate = (element: JQuery): void => {
+        // $compile(element)($scope);
+        console.log(element);
+      };
+      vm.selectCell = (layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell): void => {
+        if (this.editMode) {
+          this.tableLayout.selectedCell = null;
+          this.fieldSets.forEach((fieldset: components.tableLayout.ITableCellContent): void => {
+            fieldset.data.layout.selectedCell = null;
+          });
+          var selectedCell: components.tableLayout.ITableCell = angular.copy(cell);
+          layout.selectedCell = selectedCell;
+          this.selectedCell = selectedCell;
+        }
+      };
 
-        vm.allowContent = (layout: components.tableLayout.ITableLayout, content: components.tableLayout.ITableCellContent): boolean => {
+      vm.allowContent = (layout: components.tableLayout.ITableLayout, content: components.tableLayout.ITableCellContent): boolean => {
         if (layout.cellType === 'field') {
           return false;
         }

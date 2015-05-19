@@ -1,9 +1,10 @@
 table-layout {
+  display: block;
   table {
     border-spacing: 0;
     empty-cells: hide;
     table-layout: fixed;
-    border-collapse: separate;
+    border-collapse: collapse;
     > tbody {
       > tr {
         > td {
@@ -25,13 +26,37 @@ table-layout {
           &.drag-over-all {
             border: 1px solid red !important;
           }
-          &.selected {
-            background-color: lightpink;
-          }
           > table-layout-cell {
             display: block;
             overflow: hidden;
             min-height: 20px;
+            padding-left: 4px;
+            padding-right: 4px;
+          }
+        }
+      }
+    }
+  }
+  .edit-mode {
+    tbody {
+      tr {
+        td {
+          border: 1px dotted #e0e0e0;
+          padding-bottom: 4px;
+          &.selected {
+            background-color: lightpink;
+          }
+        }
+      }
+    }
+    table {
+      tbody {
+        tr {
+          td {
+            border: 1px dashed #e0e0e0;
+            &.selected {
+              background-color: lightpink;
+            }
           }
         }
       }

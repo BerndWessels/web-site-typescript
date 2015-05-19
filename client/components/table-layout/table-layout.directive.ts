@@ -1,10 +1,11 @@
 ((): void => {
   'use strict';
-  directive.$inject = [];
-  function directive(): ng.IDirective {
+  directive.$inject = ['$interval'];
+  function directive($interval: ng.IIntervalService): ng.IDirective {
     return <ng.IDirective> {
       restrict: 'EAC',
       scope: {
+        editMode: '=',
         layout: '=',
         compileCellTemplate: '=',
         selectCell: '=',
@@ -41,12 +42,16 @@
           );
         }
       }, true);
-      scope.$watch((): any => {
-        return instanceElement.innerWidth();
-      }, (newValue: any, oldValue: any) => {
-        if (newValue) {
-          controller.update(newValue);
+      var width: number = 0;
+      var interval: ng.IPromise<any> = $interval((): void => {
+        var newWidth: number = instanceElement.innerWidth();
+        if (width !== newWidth) {
+          width = newWidth;
+          controller.update(width);
         }
+      }, 100);
+      scope.$on('$destroy', (): void => {
+        $interval.cancel(interval);
       });
     }
   }

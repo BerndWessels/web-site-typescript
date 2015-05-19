@@ -40,7 +40,7 @@ var components;
                         }
                     }, _this);
                     _this.numCols = _this.numCols > tableRow.length ? _this.numCols : tableRow.length;
-                    _this.colWidth = Math.floor((tableWidth - (_this.numCols * 2)) / _this.numCols);
+                    _this.colWidth = Math.floor((tableWidth - _this.numCols) / _this.numCols);
                     _this.rows.push(row);
                 }, this);
             };

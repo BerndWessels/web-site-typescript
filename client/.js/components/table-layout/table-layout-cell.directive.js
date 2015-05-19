@@ -30,6 +30,10 @@
             });
             // triggered by an event outside of the angular world.
             scope.dragStart = function () {
+                // only in edit mode.
+                if (!controller.editMode) {
+                    return;
+                }
                 // let the event finish before messing with the element that triggered it.
                 $timeout(function () {
                     // back in the angular world, now remove the cell from the layout.

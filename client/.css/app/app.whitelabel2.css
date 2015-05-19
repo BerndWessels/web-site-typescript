@@ -7068,11 +7068,20 @@ body {
   height: 100%;
   margin: 0;
 }
+content trial form {
+  background-color: #f8f8f8;
+}
+content trial form table-layout {
+  width: 100%;
+}
+table-layout {
+  display: block;
+}
 table-layout table {
   border-spacing: 0;
   empty-cells: hide;
   table-layout: fixed;
-  border-collapse: separate;
+  border-collapse: collapse;
 }
 table-layout table > tbody > tr > td {
   padding: 0;
@@ -7094,13 +7103,25 @@ table-layout table > tbody > tr > td.drag-over-bottom {
 table-layout table > tbody > tr > td.drag-over-all {
   border: 1px solid red !important;
 }
-table-layout table > tbody > tr > td.selected {
-  background-color: lightpink;
-}
 table-layout table > tbody > tr > td > table-layout-cell {
   display: block;
   overflow: hidden;
   min-height: 20px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+table-layout .edit-mode tbody tr td {
+  border: 1px dotted #e0e0e0;
+  padding-bottom: 4px;
+}
+table-layout .edit-mode tbody tr td.selected {
+  background-color: lightpink;
+}
+table-layout .edit-mode table tbody tr td {
+  border: 1px dashed #e0e0e0;
+}
+table-layout .edit-mode table tbody tr td.selected {
+  background-color: lightpink;
 }
 body {
   box-sizing: content-box;

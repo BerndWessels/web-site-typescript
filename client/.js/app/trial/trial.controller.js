@@ -8,13 +8,24 @@ var app;
                 var _this = this;
                 this.$scope = $scope;
                 this.$compile = $compile;
+                this.editMode = true;
                 var vm = this;
                 vm.name = 'Bernd';
-                // vm.compileTableLayoutCellTemplate = (element: JQuery): void => {
-                //   $compile(element)($scope);
-                // };
+                // todo: not used in this case.
+                vm.compileTableLayoutCellTemplate = function (element) {
+                    // $compile(element)($scope);
+                    console.log(element);
+                };
                 vm.selectCell = function (layout, cell) {
-                    return false; // todo return void and select in here!
+                    if (_this.editMode) {
+                        _this.tableLayout.selectedCell = null;
+                        _this.fieldSets.forEach(function (fieldset) {
+                            fieldset.data.layout.selectedCell = null;
+                        });
+                        var selectedCell = angular.copy(cell);
+                        layout.selectedCell = selectedCell;
+                        _this.selectedCell = selectedCell;
+                    }
                 };
                 vm.allowContent = function (layout, content) {
                     if (layout.cellType === 'field') {

@@ -18,9 +18,10 @@ module components.tableLayout {
     data: any;
   }
   export interface ITableLayoutController {
+    editMode: boolean;
     layout: ITableLayout;
     rows: ITableCell[][];
-    selectCell: (layout: ITableLayout, cell: ITableCell) => boolean;
+    selectCell: (layout: ITableLayout, cell: ITableCell) => void;
     allowContent: (layout: ITableLayout, content: ITableCellContent) => boolean;
     addedContent: (layout: ITableLayout, cell: ITableCell) => void;
     removedContent: (layout: ITableLayout, cell: ITableCell) => void;
@@ -35,9 +36,10 @@ module components.tableLayout {
   }
   class TableLayoutController implements ITableLayoutController {
     static $inject: string[] = ['$scope'];
+    editMode: boolean;
     layout: ITableLayout;
     rows: ITableCell[][];
-    selectCell: (layout: ITableLayout, cell: ITableCell) => boolean;
+    selectCell: (layout: ITableLayout, cell: ITableCell) => void;
     allowContent: (layout: ITableLayout, content: ITableCellContent) => boolean;
     addedContent: (layout: ITableLayout, cell: ITableCell) => void;
     removedContent: (layout: ITableLayout, cell: ITableCell) => void;
@@ -82,7 +84,7 @@ module components.tableLayout {
           }
         }, this);
         this.numCols = this.numCols > tableRow.length ? this.numCols : tableRow.length;
-        this.colWidth = Math.floor((tableWidth - (this.numCols * 2)) / this.numCols);
+        this.colWidth = Math.floor((tableWidth - this.numCols) / this.numCols);
         this.rows.push(row);
       }, this);
     }

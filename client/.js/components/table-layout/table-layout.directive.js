@@ -1,10 +1,11 @@
 (function () {
     'use strict';
-    directive.$inject = [];
-    function directive() {
+    directive.$inject = ['$interval'];
+    function directive($interval) {
         return {
             restrict: 'EAC',
             scope: {
+                editMode: '=',
                 layout: '=',
                 compileCellTemplate: '=',
                 selectCell: '=',
@@ -34,12 +35,16 @@
                     controller.updateSelectedSpan(newValue.colSpan - tableCell.colSpan, newValue.rowSpan - tableCell.rowSpan);
                 }
             }, true);
-            scope.$watch(function () {
-                return instanceElement.innerWidth();
-            }, function (newValue, oldValue) {
-                if (newValue) {
-                    controller.update(newValue);
+            var width = 0;
+            var interval = $interval(function () {
+                var newWidth = instanceElement.innerWidth();
+                if (width !== newWidth) {
+                    width = newWidth;
+                    controller.update(width);
                 }
+            }, 100);
+            scope.$on('$destroy', function () {
+                $interval.cancel(interval);
             });
         }
     }

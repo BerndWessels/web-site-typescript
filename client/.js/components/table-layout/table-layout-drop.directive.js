@@ -10,6 +10,9 @@
         };
         function link(scope, instanceElement, instanceAttributes, controller, transclude) {
             instanceElement.on('dragenter', function (eventObject) {
+                if (!controller.editMode) {
+                    return;
+                }
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
                     return;
                 }
@@ -24,6 +27,9 @@
                 }
             });
             instanceElement.on('dragover', function (eventObject) {
+                if (!controller.editMode) {
+                    return;
+                }
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
                     return;
                 }
@@ -62,6 +68,9 @@
             });
             var data;
             instanceElement.on('dragleave', function (eventObject) {
+                if (!controller.editMode) {
+                    return;
+                }
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
                     return;
                 }
@@ -76,6 +85,9 @@
                 }
             });
             instanceElement.on('drop', function (eventObject) {
+                if (!controller.editMode) {
+                    return;
+                }
                 if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
                     return;
                 }
@@ -95,8 +107,17 @@
                 }
             });
             instanceElement.on('click', function (eventObject) {
+                if (!controller.editMode) {
+                    return;
+                }
                 scope.$apply(function () {
-                    controller.layout.selectedCell = angular.copy(scope.cell);
+                    var deselect = eventObject.ctrlKey;
+                    if (controller.selectCell) {
+                        controller.selectCell(controller.layout, deselect ? null : scope.cell);
+                    }
+                    else {
+                        controller.layout.selectedCell = deselect ? null : angular.copy(scope.cell);
+                    }
                 });
                 eventObject.preventDefault();
                 eventObject.stopPropagation();

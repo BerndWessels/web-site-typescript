@@ -14,6 +14,9 @@
                   controller: components.tableLayout.ITableLayoutController,
                   transclude: ng.ITranscludeFunction): void {
       instanceElement.on('dragenter', (eventObject: JQueryEventObject): any => {
+        if (!controller.editMode) {
+          return;
+        }
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
           return;
         }
@@ -28,6 +31,9 @@
         }
       });
       instanceElement.on('dragover', (eventObject: JQueryEventObject): any => {
+        if (!controller.editMode) {
+          return;
+        }
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
           return;
         }
@@ -65,6 +71,9 @@
       });
       var data: components.tableLayout.ITableCellContent;
       instanceElement.on('dragleave', (eventObject: JQueryEventObject): any => {
+        if (!controller.editMode) {
+          return;
+        }
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
           return;
         }
@@ -79,6 +88,9 @@
         }
       });
       instanceElement.on('drop', (eventObject: JQueryEventObject): any => {
+        if (!controller.editMode) {
+          return;
+        }
         if (dragDropService.getType() !== $parse(instanceAttributes['tableLayoutDrop'])(scope)) {
           return;
         }
@@ -98,8 +110,16 @@
         }
       });
       instanceElement.on('click', (eventObject: JQueryEventObject): any => {
+        if (!controller.editMode) {
+          return;
+        }
         scope.$apply((): void => {
-          controller.layout.selectedCell = angular.copy((<any>scope).cell);
+          var deselect: boolean = eventObject.ctrlKey;
+          if (controller.selectCell) {
+            controller.selectCell(controller.layout, deselect ? null : (<any>scope).cell);
+          } else {
+            controller.layout.selectedCell = deselect ? null : angular.copy((<any>scope).cell);
+          }
         });
         eventObject.preventDefault();
         eventObject.stopPropagation();

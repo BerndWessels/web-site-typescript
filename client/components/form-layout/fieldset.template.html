@@ -1,6 +1,7 @@
 <fieldset>
-  <legend>{{cell.content.data.legend}}</legend>
-  <table-layout layout="cell.content.data.layout" select-cell="vm.selectCell" allow-content="vm.allowContent"
+  <legend>{{cell.content.data.legend}} - {{vm.editMode}}</legend>
+  <table-layout edit-mode="vm.editMode" layout="cell.content.data.layout" select-cell="vm.selectCell"
+                allow-content="vm.allowContent"
                 added-content="vm.addedContent"
                 removed-content="vm.removedContent"
                 style="display: block; width: 100%; box-sizing: border-box;"></table-layout>
