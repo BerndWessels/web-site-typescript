@@ -31,45 +31,74 @@
 </form>
 <hr/>
 -->
-<h1>Bernd</h1>
-<trial class="container">
-  <row class="row">
-    <cell class="col-xs-12">
-      <label>edit mode</label>
-      <input type="checkbox" ng-model="trialCtrl.editMode"/>
-      <label>rowspan</label>
-      <input type="number" ng-model="trialCtrl.selectedCell.rowSpan" min="1"/>
-      <label>colspan</label>
-      <input type="number" ng-model="trialCtrl.selectedCell.colSpan" min="1"/>
-      <hr/>
-      <form>
-        <table-layout edit-mode="trialCtrl.editMode"
-                      layout="trialCtrl.tableLayout"
-                      select-cell="trialCtrl.selectCell"
-                      allow-content="trialCtrl.allowContent"
-                      added-content="trialCtrl.addedContent"
-                      removed-content="trialCtrl.removedContent">
-        </table-layout>
-      </form>
-      <hr/>
-      <ul>
-        <li ng-repeat="fieldSet in trialCtrl.fieldSets" draggable="true" drag-effect="'move'" drag-type="'fieldset'"
-            drag-data="fieldSet">
-          {{fieldSet.id}}
-        </li>
-      </ul>
-      <hr/>
-      <ul>
-        <li ng-repeat="field in trialCtrl.fields" draggable="true" drag-effect="'move'" drag-type="'field'"
-            drag-data="field">
-          <label>{{field.data.label}}</label><input type="text" ng-model="field.data.value">
-        </li>
-      </ul>
-      <ul>
-        <li ng-repeat="field in trialCtrl.usedFields">
-          {{field.id}} - {{field.type}}
-        </li>
-      </ul>
-    </cell>
-  </row>
+<trial>
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <label>edit mode</label>
+        <input type="checkbox" ng-model="trialCtrl.editMode"/>
+        <label>rowspan</label>
+        <input type="number" ng-model="trialCtrl.selectedCell.rowSpan" min="1"/>
+        <label>colspan</label>
+        <input type="number" ng-model="trialCtrl.selectedCell.colSpan" min="1"/>
+        <hr/>
+        <form class="form-layout">
+          <table-layout edit-mode="trialCtrl.editMode"
+                        layout="trialCtrl.tableLayout"
+                        select-cell="trialCtrl.selectCell"
+                        allow-content="trialCtrl.allowContent"
+                        added-content="trialCtrl.addedContent"
+                        removed-content="trialCtrl.removedContent">
+          </table-layout>
+        </form>
+        <hr/>
+        <form>
+          <div class="form-group form-group-sm">
+            <button class="btn btn-primary" ng-click="trialCtrl.addFieldSet()">New Fieldset</button>
+          </div>
+          <div class="form-group form-group-sm" ng-repeat="fieldSet in trialCtrl.fieldSets" draggable="true"
+               drag-effect="'move'" drag-type="'fieldset'"
+               drag-data="fieldSet">
+            <input type="text" class="form-control" ng-model="fieldSet.data.legend">
+          </div>
+        </form>
+        <hr/>
+        <form>
+          <div class="form-group form-group-sm">
+            <button class="btn btn-primary" ng-model="trialCtrl.groupFields" btn-checkbox>Group Fields</button>
+          </div>
+          <div class="form-group form-group-sm" ng-if="!trialCtrl.groupFields" ng-repeat="field in trialCtrl.fields"
+               draggable="true"
+               drag-effect="'move'" drag-type="'field'"
+               drag-data="field">
+            <label>{{field.data.category}} : {{field.data.label}}</label>
+            <input type="text" class="form-control" ng-model="field.data.value">
+          </div>
+          <fieldset class="form-group form-group-sm" ng-if="trialCtrl.groupFields"
+                    ng-repeat="group in trialCtrl.groupedFields">
+            <legend>{{group.category}}</legend>
+            <div class="form-group form-group-sm" ng-repeat="field in group.fields"
+                 draggable="true"
+                 drag-effect="'move'" drag-type="'field'"
+                 drag-data="field">
+              <label>{{field.data.label}}</label>
+              <input type="text" class="form-control" ng-model="field.data.value">
+            </div>
+          </fieldset>
+        </form>
+        <!--
+        <div class="form-group form-group-sm">
+          <label for="{{cell.content.data.id}}">{{cell.content.data.label}}</label>
+          <input type="text" id="{{cell.content.data.id}}" class="form-control" ng-model="cell.content.data.value">
+        </div>
+
+                <ul>
+                  <li ng-repeat="field in trialCtrl.usedFields">
+                    {{field.id}} - {{field.type}}
+                  </li>
+                </ul>
+        -->
+      </div>
+    </div>
+  </div>
 </trial>

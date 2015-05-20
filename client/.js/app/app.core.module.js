@@ -3,7 +3,8 @@
     angular.module('app.core', [
         'ngRoute',
         'tableLayout',
-        'dragDrop'
+        'dragDrop',
+        'ui.bootstrap'
     ]);
 })();
 //# sourceMappingURL=app.core.module.js.map

@@ -3,6 +3,7 @@
   angular.module('app.core', [
     'ngRoute',
     'tableLayout',
-    'dragDrop'
+    'dragDrop',
+    'ui.bootstrap'
   ]);
 })();

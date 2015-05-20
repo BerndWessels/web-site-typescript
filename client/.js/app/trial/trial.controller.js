@@ -66,42 +66,51 @@ var app;
                     }));
                 };
                 vm.usedFields = [];
-                vm.loadTableLayout();
+                this.tableLayout = this.getEmptyTableLayout('fieldset');
                 vm.name = 'Trial';
                 vm.fieldSets = [
                     {
                         id: 1,
                         template: components.formLayout.fieldsetTemplate,
-                        data: { legend: 'One', layout: vm.getEmptyTableLayout() }
+                        data: { legend: 'One', layout: vm.getEmptyTableLayout('field') }
                     },
                     {
                         id: 2,
                         template: components.formLayout.fieldsetTemplate,
-                        data: { legend: 'Two', layout: vm.getEmptyTableLayout() }
+                        data: { legend: 'Two', layout: vm.getEmptyTableLayout('field') }
                     }
                 ];
+                vm.addFieldSet = function () {
+                    vm.fieldSets.push({
+                        id: new Date().getTime(),
+                        template: components.formLayout.fieldsetTemplate,
+                        data: { legend: 'untitled', layout: vm.getEmptyTableLayout('field') }
+                    });
+                };
                 vm.fields = [
-                    { id: 1, template: components.formLayout.fieldTemplate, data: { label: 'Een', value: 'Eins' } },
-                    { id: 2, template: components.formLayout.fieldTemplate, data: { label: 'Twe', value: 'Zwei' } }
+                    { id: 1, template: components.formLayout.fieldTemplate, data: { category: 'Odd', label: 'One', value: '1' } },
+                    { id: 2, template: components.formLayout.fieldTemplate, data: { category: 'Even', label: 'Two', value: '2' } },
+                    { id: 3, template: components.formLayout.fieldTemplate, data: { category: 'Odd', label: 'Three', value: '3' } },
+                    { id: 4, template: components.formLayout.fieldTemplate, data: { category: 'Even', label: 'Four', value: '4' } },
+                    { id: 5, template: components.formLayout.fieldTemplate, data: { category: 'Odd', label: 'Five', value: '5' } },
+                    { id: 6, template: components.formLayout.fieldTemplate, data: { category: 'Even', label: 'Six', value: '6' } },
+                    { id: 7, template: components.formLayout.fieldTemplate, data: { category: 'Odd', label: 'Seven', value: '7' } },
+                    { id: 8, template: components.formLayout.fieldTemplate, data: { category: 'Even', label: 'Eight', value: '8' } },
+                    { id: 9, template: components.formLayout.fieldTemplate, data: { category: 'Odd', label: 'Nine', value: '9' } },
+                    { id: 10, template: components.formLayout.fieldTemplate, data: { category: 'Even', label: 'Ten', value: '10' } },
                 ];
+                vm.groupedFields = _.chain(vm.fields).groupBy(function (field) {
+                    return field.data.category;
+                }).pairs().map(function (item) {
+                    return { category: item[0], fields: item[1] };
+                }).value();
             }
-            TrialController.prototype.getEmptyTableLayout = function () {
+            TrialController.prototype.getEmptyTableLayout = function (cellType) {
                 return {
-                    cellType: 'field',
+                    cellType: cellType,
                     selectedCell: null,
                     tableCells: [],
                     tableRows: [[null]]
-                };
-            };
-            TrialController.prototype.loadTableLayout = function () {
-                this.tableLayout = {
-                    cellType: 'fieldset',
-                    selectedCell: null,
-                    tableCells: [
-                    ],
-                    tableRows: [
-                        [null]
-                    ]
                 };
             };
             TrialController.$inject = ['$scope', '$compile'];

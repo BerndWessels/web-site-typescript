@@ -15,7 +15,6 @@ module components.tableLayout {
   export interface ITableCellContent {
     id: number;
     template: string;
-    data: any;
   }
   export interface ITableLayoutController {
     editMode: boolean;
