@@ -1,23 +1,38 @@
+/**
+ * This is a component that helps you dynamically create table layouts with row and col span.
+ */
 var components;
 (function (components) {
     var tableLayout;
     (function (tableLayout) {
         'use strict';
+        /**
+         * This is the controller for the table layout directive.
+         */
         var TableLayoutController = (function () {
+            /**
+             * This is the constructor that takes the injected dependencies.
+             *
+             * @param $scope Injected scope dependency.
+             */
             function TableLayoutController($scope) {
                 this.$scope = $scope;
-                console.log();
             }
-            TableLayoutController.prototype.getTemplateScope = function () {
-                return this.$scope.$parent;
-            };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.getTableCell = function (id) {
                 return _.find(this.layout.tableCells, function (tableCell) {
                     return tableCell.id === id;
                 });
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.update = function (tableWidth) {
                 var _this = this;
+                // the layout matrix flattens row and col spans,
+                // while the render matrix excludes spanned cells.
                 if (tableWidth <= 0) {
                     return;
                 }
@@ -25,25 +40,38 @@ var components;
                     return;
                 }
                 this.tableWidth = tableWidth;
+                // reset the render-matrix.
                 this.rows = [];
                 var renderedCells = [];
                 this.numCols = 0;
+                // go through every layout row.
                 this.layout.tableRows.forEach(function (tableRow) {
+                    // create a new render row.
                     var row = [];
+                    // go through every layout cell.
                     tableRow.forEach(function (tableCellId) {
                         if (tableCellId === null) {
+                            // empty layout cells transform into empty render cells.
                             row.push(null);
                         }
                         else if (renderedCells.indexOf(tableCellId) === -1) {
+                            // remember already rendered layout cells.
                             renderedCells.push(tableCellId);
+                            // each layout cell will only be transformed into a render cell once.
                             row.push(_this.getTableCell(tableCellId));
                         }
                     }, _this);
+                    // calculate the maximum number of columns.
                     _this.numCols = _this.numCols > tableRow.length ? _this.numCols : tableRow.length;
+                    // calculate the resulting column width.
                     _this.colWidth = Math.floor((tableWidth - _this.numCols) / _this.numCols);
+                    // add the generated row to the render-matrix.
                     _this.rows.push(row);
                 }, this);
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.insertCol = function (tableColIndex) {
                 var _this = this;
                 // remember cells with already extended colSpan.
@@ -73,6 +101,9 @@ var components;
                     }
                 }, this);
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.insertRow = function (tableRowIndex) {
                 var _this = this;
                 // remember cells with already extended colSpan.
@@ -105,6 +136,9 @@ var components;
                     }, this);
                 }
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.colIndexToTableColIndex = function (tableRowIndex, colIndex) {
                 // transform the colIndex into a tableColIndex.
                 var tableColIndex = 0;
@@ -118,8 +152,11 @@ var components;
                 }
                 return --tableColIndex;
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.drop = function (tableRowIndex, colIndex, side, content) {
-                // add the new table cell to the layout. todo: change id from number to timestamp.
+                // add the new table cell to the layout.
                 var newCell = {
                     id: new Date().getTime(),
                     content: content,
@@ -227,18 +264,26 @@ var components;
                     }
                 }
                 else {
+                    // put the new cell into the empty cell.
                     this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
                 }
+                // update the render-matrix.
                 this.update(this.tableWidth);
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.remove = function (tableCellId) {
                 var _this = this;
+                // reset the row and column span of the cell to be removed.
                 var tableCell = this.getTableCell(tableCellId);
                 tableCell.colSpan = 1;
                 tableCell.rowSpan = 1;
+                // reset the selected cell if necessary.
                 if (this.layout.selectedCell && this.layout.selectedCell.id === tableCell.id) {
                     this.layout.selectedCell = null;
                 }
+                // remove the cell from the layout-matrix.
                 this.layout.tableRows.forEach(function (tableRow) {
                     tableRow.forEach(function (id, x) {
                         if (tableCellId === id) {
@@ -246,6 +291,7 @@ var components;
                         }
                     }, _this);
                 }, this);
+                // remove the cell from the used cells.
                 _.remove(this.layout.tableCells, function (cell) {
                     return cell.id === tableCellId;
                 });
@@ -253,11 +299,17 @@ var components;
                 if (this.removedContent) {
                     this.removedContent(this.layout, tableCell);
                 }
+                // compact the layout-matrix.
                 this.compact();
+                // update the render-matrix.
                 this.update(this.tableWidth);
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.compact = function () {
                 var _this = this;
+                // find all empty rows.
                 var removeRows = [];
                 this.layout.tableRows.forEach(function (tableRow, y) {
                     var isEmpty = true;
@@ -270,6 +322,7 @@ var components;
                         removeRows.push(y);
                     }
                 }, this);
+                // find all empty columns.
                 var removeCols = [];
                 this.layout.tableRows[0].forEach(function (id, x) {
                     var isEmpty = true;
@@ -282,25 +335,33 @@ var components;
                         removeCols.push(x);
                     }
                 }, this);
+                // remove empty rows from the layout-matrix.
                 removeRows.reverse();
                 removeRows.forEach(function (y) {
                     _this.layout.tableRows.splice(y, 1);
                 }, this);
+                // remove empty columns from the layout-matrix.
                 removeCols.reverse();
                 removeCols.forEach(function (x) {
                     _this.layout.tableRows.forEach(function (tableRow) {
                         tableRow.splice(x, 1);
                     }, _this);
                 }, this);
+                // make sure there is at least one row with one empty cell.
                 if (this.layout.tableRows.length === 0) {
                     this.layout.tableRows.push([null]);
                 }
             };
+            /**
+             * @inheritdoc
+             */
             TableLayoutController.prototype.updateSelectedSpan = function (diffColSpan, diffRowSpan) {
                 var _this = this;
+                // update the cell's row and column span.
                 var tableCell = this.getTableCell(this.layout.selectedCell.id);
                 tableCell.colSpan += diffColSpan;
                 tableCell.rowSpan += diffRowSpan;
+                // find the cell's row and col index.
                 var tableColIndex = null;
                 var tableRowIndex = null;
                 this.layout.tableRows.forEach(function (tableRow, y) {
@@ -344,9 +405,15 @@ var components;
                     this.compact();
                 }
             };
+            /**
+             * This is the dependency injection for the class constructor.
+             *
+             * @type {string[]} Dependencies to be injected.
+             */
             TableLayoutController.$inject = ['$scope'];
             return TableLayoutController;
         })();
+        // register the controller.
         angular.module('tableLayout').controller('tableLayout.TableLayoutController', TableLayoutController);
     })(tableLayout = components.tableLayout || (components.tableLayout = {}));
 })(components || (components = {}));

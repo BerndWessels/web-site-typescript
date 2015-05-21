@@ -1,14 +1,39 @@
 /* tslint:disable:no-string-literal */
+/**
+ * This is a directive that helps you dynamically create table layouts with row and col span.
+ */
 (function () {
     'use strict';
+    /**
+     * This is the dependency injection for the class constructor.
+     *
+     * @type {string[]} Dependencies to be injected.
+     */
     directive.$inject = ['$parse', 'dragDropService'];
+    /**
+     * This is the directive constructor that takes the injected dependencies.
+     *
+     * @param $parse Injected parse service dependency.
+     * @param dragDropService Injected drag drop service dependency.
+     * @returns {ng.IDirective}
+     */
     function directive($parse, dragDropService) {
         return {
             restrict: 'A',
             require: '^tableLayout',
             link: link
         };
+        /**
+         * This is the directives link functions.
+         *
+         * @param scope
+         * @param instanceElement
+         * @param instanceAttributes
+         * @param controller
+         * @param transclude
+         */
         function link(scope, instanceElement, instanceAttributes, controller, transclude) {
+            // process the drag-enter event.
             instanceElement.on('dragenter', function (eventObject) {
                 if (!controller.editMode) {
                     return;
@@ -20,12 +45,14 @@
                 if (controller.allowContent(controller.layout, data)) {
                     return;
                 }
+                // reset the dragging indicator classes.
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
                     instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
                     dragEvent.preventDefault();
                 }
             });
+            // process the drag-over event.
             instanceElement.on('dragover', function (eventObject) {
                 if (!controller.editMode) {
                     return;
@@ -37,6 +64,7 @@
                 if (controller.allowContent(controller.layout, data)) {
                     return;
                 }
+                // set the dragging indicator class.
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
                     instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
@@ -66,6 +94,7 @@
                     }
                 }
             });
+            // process the drag-leave event.
             var data;
             instanceElement.on('dragleave', function (eventObject) {
                 if (!controller.editMode) {
@@ -78,12 +107,14 @@
                 if (controller.allowContent(controller.layout, data)) {
                     return;
                 }
+                // reset the dragging indicator classes.
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
                     instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
                     dragEvent.preventDefault();
                 }
             });
+            // process the drop event.
             instanceElement.on('drop', function (eventObject) {
                 if (!controller.editMode) {
                     return;
@@ -95,6 +126,7 @@
                 if (controller.allowContent(controller.layout, data)) {
                     return;
                 }
+                // reset the dragging indicator and call the controller.
                 var dragEvent = eventObject;
                 if (dragEvent.dataTransfer.effectAllowed === 'move') {
                     instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
@@ -106,10 +138,12 @@
                     dragEvent.preventDefault();
                 }
             });
+            // process the click event.
             instanceElement.on('click', function (eventObject) {
                 if (!controller.editMode) {
                     return;
                 }
+                // select or deselect the cell.
                 scope.$apply(function () {
                     var deselect = eventObject.ctrlKey;
                     if (controller.selectCell) {
@@ -124,6 +158,13 @@
             });
         }
     }
+    /**
+     * This calculates the nearest side to the dragging cursor.
+     *
+     * @param instanceElement
+     * @param eventObject
+     * @returns {any}
+     */
     function calcSide(instanceElement, eventObject) {
         var mouseX = eventObject.clientX;
         var mouseY = eventObject.clientY;
@@ -146,7 +187,7 @@
             return 'bottom';
         }
     }
-    ;
+    // register the directive.
     angular.module('tableLayout').directive('tableLayoutDrop', directive);
 })();
 //# sourceMappingURL=table-layout-drop.directive.js.map

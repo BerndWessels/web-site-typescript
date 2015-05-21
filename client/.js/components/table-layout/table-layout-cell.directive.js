@@ -1,6 +1,20 @@
+/**
+ * This is a directive that helps you dynamically create table layouts with row and col span.
+ */
 (function () {
     'use strict';
+    /**
+     * This is the dependency injection for the class constructor.
+     *
+     * @type {string[]}
+     */
     directive.$inject = ['$compile', '$timeout'];
+    /**
+     * This is the directive constructor that takes the injected dependencies.
+     * @param $compile Injected compile service dependency.
+     * @param $timeout Injected timeout service dependency.
+     * @returns {ng.IDirective}
+     */
     function directive($compile, $timeout) {
         return {
             restrict: 'EAC',
@@ -8,6 +22,15 @@
             scope: false,
             link: link
         };
+        /**
+         * This is the directives link functions.
+         *
+         * @param scope
+         * @param instanceElement
+         * @param instanceAttributes
+         * @param controller
+         * @param transclude
+         */
         function link(scope, instanceElement, instanceAttributes, controller, transclude) {
             // watch the cell content.
             scope.$watch(function () {
@@ -42,6 +65,7 @@
             };
         }
     }
+    // register the directive.
     angular.module('tableLayout').directive('tableLayoutCell', directive);
 })();
 //# sourceMappingURL=table-layout-cell.directive.js.map
