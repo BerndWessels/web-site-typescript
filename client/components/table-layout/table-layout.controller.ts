@@ -1,67 +1,242 @@
+/**
+ * This is a component that helps you dynamically create table layouts with row and col span.
+ */
 module components.tableLayout {
   'use strict';
+  /**
+   * This is the structure of the table layout.
+   */
   export interface ITableLayout {
+    /**
+     * This is the type of cells that can be dragged into this table layout.
+     */
     cellType: string;
+    /**
+     * This is a copy of the currently selected cell.
+     */
     selectedCell: ITableCell;
+    /**
+     * This is a list of all cells used in this table layout.
+     */
     tableCells: ITableCell[];
+    /**
+     * These are the rows of the table layout.
+     */
     tableRows: number[][];
   }
+  /**
+   * This is the structure of the table cell.
+   */
   export interface ITableCell {
+    /**
+     * This is the automatically generated table cell identifier.
+     *
+     * It is the 'new Date().getTime()' from when it was created.
+     */
     id: number;
+    /**
+     * This is the content of the table cell.
+     */
     content: ITableCellContent;
+    /**
+     * This is the number of rows this table cell will span.
+     */
     rowSpan: number;
+    /**
+     * This is the number of columns this table cell will span.
+     */
     colSpan: number;
   }
+  /**
+   * This is the structure of the table cell content.
+   *
+   * It is usually extended for the specific use-case.
+   */
   export interface ITableCellContent {
+    /**
+     * This is the use-case generated table cell content identifier.
+     */
     id: number;
+    /**
+     * This is the html template of the table cell content.
+     */
     template: string;
   }
+  /**
+   * This is the structure of the table layout controller.
+   */
   export interface ITableLayoutController {
+    /**
+     * This is a flag that enables the table layout to be edited by the user.
+     *
+     * It is bound to the controller by the isolate scope attribute binding.
+     */
     editMode: boolean;
+    /**
+     * This is the table layout data.
+     *
+     * It is bound to the controller by the isolate scope attribute binding.
+     */
     layout: ITableLayout;
-    rows: ITableCell[][];
-    selectCell: (layout: ITableLayout, cell: ITableCell) => void;
-    allowContent: (layout: ITableLayout, content: ITableCellContent) => boolean;
-    addedContent: (layout: ITableLayout, cell: ITableCell) => void;
-    removedContent: (layout: ITableLayout, cell: ITableCell) => void;
-    update(tableWidth: number): void;
-    drop(rowIndex: number, colIndex: number, side: string, data: any): void;
-    remove(tableCellId: number): void;
-    updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void;
-    getTableCell(id: number): ITableCell;
-    getTemplateScope(): ng.IScope;
+    /**
+     * This external callback will be called when the user selects a cell.
+     *
+     * It is bound to the controller by the isolate scope attribute binding.
+     * @param layout This table layout.
+     * @param cell The selected cell.
+     */
+    selectCell(layout: ITableLayout, cell: ITableCell): void;
+    /**
+     * This external callback will be called to determine if content can be dropped.
+     *
+     *
+     * It is bound to the controller by the isolate scope attribute binding.
+     * @param layout This table layout.
+     * @param content The content to be dropped.
+     */
+    allowContent(layout: ITableLayout, content: ITableCellContent): boolean;
+    /**
+     * This external callback will be called when content has been dropped into this table layout.
+     *
+     * It is bound to the controller by the isolate scope attribute binding.
+     * @param layout This table layout.
+     * @param cell The newly created cell.
+     */
+    addedContent(layout: ITableLayout, cell: ITableCell): void;
+    /**
+     * This external callback will be called when content has been dragged out of this table layout.
+     *
+     * It is bound to the controller by the isolate scope attribute binding.
+     * @param layout This table layout.
+     * @param cell The cell that will be removed.
+     */
+    removedContent(layout: ITableLayout, cell: ITableCell): void;
+    /**
+     * This external callback is called to render cell content by an external scope.
+     *
+     * It is bound to the controller by the isolate scope attribute binding.
+     * @param element The element into which the content should be rendered.
+     */
     compileCellTemplate(element: JQuery): void;
+    /**
+     * This is called to synchronize the current layout.
+     *
+     * @param tableWidth The width in pixel of the table layout.
+     */
+    update(tableWidth: number): void;
+    /**
+     * This is called when content is dropped into the layout.
+     *
+     * @param rowIndex The row index the content has been dropped on.
+     * @param colIndex The column index the content has been dropped on.
+     * @param side The side the content has been dropped on.
+     * @param data The content that has been dropped.
+     */
+    drop(rowIndex: number, colIndex: number, side: string, content: ITableCellContent): void;
+    /**
+     * This is called when a cell is dragged out of the layout.
+     *
+     * @param tableCellId The identifer of the cell that will be removed.
+     */
+    remove(tableCellId: number): void;
+    /**
+     * This is called when the row or column span of the selected cell has changed.
+     *
+     * @param diffColSpan The change in column span.
+     * @param diffRowSpan The change in row span.
+     */
+    updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void;
+    /**
+     * This is called to get the cell for a given  cell id.
+     *
+     * @param id The cell identifier.
+     */
+    getTableCell(id: number): ITableCell;
+    /**
+     * This is called to transform a render-matrix col index into a layout-matrix col index.
+     * @param tableRowIndex The row index.
+     * @param colIndex The render-matrix column index.
+     */
     colIndexToTableColIndex(tableRowIndex: number, colIndex: number): number;
   }
+  /**
+   * This is the controller for the table layout directive.
+   */
   class TableLayoutController implements ITableLayoutController {
+    /**
+     * This is the dependency injection for the class constructor.
+     *
+     * @type {string[]} Dependencies to be injected.
+     */
     static $inject: string[] = ['$scope'];
+    /**
+     * @inheritdoc
+     */
     editMode: boolean;
+    /**
+     * @inheritdoc
+     */
     layout: ITableLayout;
-    rows: ITableCell[][];
+    /**
+     * @inheritdoc
+     */
     selectCell: (layout: ITableLayout, cell: ITableCell) => void;
+    /**
+     * @inheritdoc
+     */
     allowContent: (layout: ITableLayout, content: ITableCellContent) => boolean;
+    /**
+     * @inheritdoc
+     */
     addedContent: (layout: ITableLayout, cell: ITableCell) => void;
+    /**
+     * @inheritdoc
+     */
     removedContent: (layout: ITableLayout, cell: ITableCell) => void;
+    /**
+     * @inheritdoc
+     */
     compileCellTemplate: (element: JQuery) => void;
+    /**
+     * The render-matrix.
+     */
+    rows: ITableCell[][];
+    /**
+     * The calculated number of columns in the layout.
+     */
     numCols: number;
+    /**
+     * The calculated column width for this layout.
+     */
     colWidth: number;
+    /**
+     * The given table width of this layout.
+     */
     tableWidth: number;
 
+    /**
+     * This is the constructor that takes the injected dependencies.
+     *
+     * @param $scope Injected scope dependency.
+     */
     constructor(private $scope: ng.IScope) {
-      console.log();
     }
 
-    getTemplateScope(): ng.IScope {
-      return this.$scope.$parent;
-    }
-
+    /**
+     * @inheritdoc
+     */
     getTableCell(id: number): ITableCell {
       return _.find(this.layout.tableCells, (tableCell: ITableCell) => {
         return tableCell.id === id;
       });
     }
 
+    /**
+     * @inheritdoc
+     */
     update(tableWidth: number): void {
+      // the layout matrix flattens row and col spans,
+      // while the render matrix excludes spanned cells.
       if (tableWidth <= 0) {
         return;
       }
@@ -69,25 +244,38 @@ module components.tableLayout {
         return;
       }
       this.tableWidth = tableWidth;
+      // reset the render-matrix.
       this.rows = <ITableCell[][]> [];
       var renderedCells: number[] = [];
       this.numCols = 0;
+      // go through every layout row.
       this.layout.tableRows.forEach((tableRow: number[]) => {
+        // create a new render row.
         var row: ITableCell[] = [];
+        // go through every layout cell.
         tableRow.forEach((tableCellId: number) => {
           if (tableCellId === null) {
+            // empty layout cells transform into empty render cells.
             row.push(null);
           } else if (renderedCells.indexOf(tableCellId) === -1) {
+            // remember already rendered layout cells.
             renderedCells.push(tableCellId);
+            // each layout cell will only be transformed into a render cell once.
             row.push(this.getTableCell(tableCellId));
           }
         }, this);
+        // calculate the maximum number of columns.
         this.numCols = this.numCols > tableRow.length ? this.numCols : tableRow.length;
+        // calculate the resulting column width.
         this.colWidth = Math.floor((tableWidth - this.numCols) / this.numCols);
+        // add the generated row to the render-matrix.
         this.rows.push(row);
       }, this);
     }
 
+    /**
+     * @inheritdoc
+     */
     insertCol(tableColIndex: number): void {
       // remember cells with already extended colSpan.
       var extendedCells: number[] = [];
@@ -116,6 +304,9 @@ module components.tableLayout {
       }, this);
     }
 
+    /**
+     * @inheritdoc
+     */
     insertRow(tableRowIndex: number): void {
       // remember cells with already extended colSpan.
       var extendedCells: number[] = [];
@@ -146,6 +337,9 @@ module components.tableLayout {
       }
     }
 
+    /**
+     * @inheritdoc
+     */
     colIndexToTableColIndex(tableRowIndex: number, colIndex: number): number {
       // transform the colIndex into a tableColIndex.
       var tableColIndex: number = 0;
@@ -166,8 +360,11 @@ module components.tableLayout {
       return --tableColIndex;
     }
 
-    drop(tableRowIndex: number, colIndex: number, side: string, content: any): void {
-      // add the new table cell to the layout. todo: change id from number to timestamp.
+    /**
+     * @inheritdoc
+     */
+    drop(tableRowIndex: number, colIndex: number, side: string, content: ITableCellContent): void {
+      // add the new table cell to the layout.
       var newCell: ITableCell = {
         id: new Date().getTime(),
         content: content,
@@ -279,18 +476,26 @@ module components.tableLayout {
             break;
         }
       } else {
+        // put the new cell into the empty cell.
         this.layout.tableRows[tableRowIndex][tableColIndex] = newCell.id;
       }
+      // update the render-matrix.
       this.update(this.tableWidth);
     }
 
+    /**
+     * @inheritdoc
+     */
     remove(tableCellId: number): void {
+      // reset the row and column span of the cell to be removed.
       var tableCell: ITableCell = this.getTableCell(tableCellId);
       tableCell.colSpan = 1;
       tableCell.rowSpan = 1;
+      // reset the selected cell if necessary.
       if (this.layout.selectedCell && this.layout.selectedCell.id === tableCell.id) {
         this.layout.selectedCell = null;
       }
+      // remove the cell from the layout-matrix.
       this.layout.tableRows.forEach((tableRow: number[]): void => {
         tableRow.forEach((id: number, x: number): void => {
           if (tableCellId === id) {
@@ -298,6 +503,7 @@ module components.tableLayout {
           }
         }, this);
       }, this);
+      // remove the cell from the used cells.
       _.remove(this.layout.tableCells, (cell: ITableCell): boolean => {
         return cell.id === tableCellId;
       });
@@ -305,11 +511,17 @@ module components.tableLayout {
       if (this.removedContent) {
         this.removedContent(this.layout, tableCell);
       }
+      // compact the layout-matrix.
       this.compact();
+      // update the render-matrix.
       this.update(this.tableWidth);
     }
 
+    /**
+     * @inheritdoc
+     */
     compact(): void {
+      // find all empty rows.
       var removeRows: number[] = [];
       this.layout.tableRows.forEach((tableRow: number[], y: number): void => {
         var isEmpty: boolean = true;
@@ -322,6 +534,7 @@ module components.tableLayout {
           removeRows.push(y);
         }
       }, this);
+      // find all empty columns.
       var removeCols: number[] = [];
       this.layout.tableRows[0].forEach((id: number, x: number): void => {
         var isEmpty: boolean = true;
@@ -334,25 +547,33 @@ module components.tableLayout {
           removeCols.push(x);
         }
       }, this);
+      // remove empty rows from the layout-matrix.
       removeRows.reverse();
       removeRows.forEach((y: number): void => {
         this.layout.tableRows.splice(y, 1);
       }, this);
+      // remove empty columns from the layout-matrix.
       removeCols.reverse();
       removeCols.forEach((x: number): void => {
         this.layout.tableRows.forEach((tableRow: number[]): void => {
           tableRow.splice(x, 1);
         }, this);
       }, this);
+      // make sure there is at least one row with one empty cell.
       if (this.layout.tableRows.length === 0) {
         this.layout.tableRows.push([null]);
       }
     }
 
+    /**
+     * @inheritdoc
+     */
     updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void {
+      // update the cell's row and column span.
       var tableCell: ITableCell = this.getTableCell(this.layout.selectedCell.id);
       tableCell.colSpan += diffColSpan;
       tableCell.rowSpan += diffRowSpan;
+      // find the cell's row and col index.
       var tableColIndex: number = null;
       var tableRowIndex: number = null;
       this.layout.tableRows.forEach((tableRow: number[], y: number): void => {
@@ -363,6 +584,7 @@ module components.tableLayout {
           }
         }, this);
       }, this);
+      // append new rows if necessary.
       while (diffRowSpan > 0) {
         diffRowSpan--;
         var yInsertIndex: number = tableRowIndex + this.layout.selectedCell.rowSpan - diffRowSpan - 1;
@@ -371,6 +593,7 @@ module components.tableLayout {
           this.layout.tableRows[yInsertIndex][tableColIndex + xInsert] = tableCell.id;
         }
       }
+      // append new columns if necessary.
       while (diffColSpan > 0) {
         diffColSpan--;
         var xInsertIndex: number = tableColIndex + this.layout.selectedCell.colSpan - diffColSpan - 1;
@@ -379,6 +602,7 @@ module components.tableLayout {
           this.layout.tableRows[tableRowIndex + yInsert][xInsertIndex] = tableCell.id;
         }
       }
+      // remove empty rows if necessary.
       while (diffRowSpan < 0) {
         diffRowSpan++;
         var yRemoveIndex: number = tableRowIndex + this.layout.selectedCell.rowSpan - diffRowSpan;
@@ -387,6 +611,7 @@ module components.tableLayout {
         }
         this.compact();
       }
+      // remove empty columns if necessary.
       while (diffColSpan < 0) {
         diffColSpan++;
         var xRemoveIndex: number = tableColIndex + this.layout.selectedCell.colSpan - diffColSpan;
@@ -398,5 +623,6 @@ module components.tableLayout {
     }
   }
 
+  // register the controller.
   angular.module('tableLayout').controller('tableLayout.TableLayoutController', TableLayoutController);
 }
