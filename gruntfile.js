@@ -280,7 +280,7 @@ module.exports = function (grunt) {
               '<%= cfg.dist %>/public/{,*/}*.js',
               '<%= cfg.dist %>/public/{,*/}*.css',
               '<%= cfg.dist %>/public/assets/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
-              '<%= cfg.dist %>/public/assets/fonts/*'
+              '<%= cfg.dist %>/public/assets/fonts/{,*/}*.{eot,ttf,woff,woff2,svg}'
             ]
           }
         }
