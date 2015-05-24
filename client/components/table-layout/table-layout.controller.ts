@@ -20,9 +20,18 @@ module components.tableLayout {
      */
     tableCells: ITableCell[];
     /**
-     * These are the rows of the table layout.
+     * This is the layout in form of a 2d matrix of ids.
      */
     tableRows: number[][];
+  }
+  export interface ILayoutCell {
+    x: number;
+    y: number;
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    tableCell: ITableCell;
   }
   /**
    * This is the structure of the table cell.
@@ -125,6 +134,12 @@ module components.tableLayout {
      */
     update(tableWidth: number): void;
     /**
+     * This is called when the height of a cell changes.
+     * @param layoutCell The changing cell.
+     * @param height The new height.
+     */
+    updateCellHeight(layoutCell: ILayoutCell, height: number): void;
+    /**
      * This is called when content is dropped into the layout.
      *
      * @param rowIndex The row index the content has been dropped on.
@@ -200,7 +215,7 @@ module components.tableLayout {
     /**
      * The render-matrix.
      */
-    rows: ITableCell[][];
+    layoutCells: ILayoutCell[];
     /**
      * The calculated number of columns in the layout.
      */
@@ -213,6 +228,10 @@ module components.tableLayout {
      * The given table width of this layout.
      */
     tableWidth: number;
+    /**
+     * The calculated height of this layout.
+     */
+    tableHeight: number;
 
     /**
      * This is the constructor that takes the injected dependencies.
@@ -245,32 +264,47 @@ module components.tableLayout {
       }
       this.tableWidth = tableWidth;
       // reset the render-matrix.
-      this.rows = <ITableCell[][]> [];
+      this.layoutCells = <ILayoutCell[]> [];
       var renderedCells: number[] = [];
       this.numCols = 0;
       // go through every layout row.
+      var y: number = 0;
       this.layout.tableRows.forEach((tableRow: number[]) => {
-        // create a new render row.
-        var row: ITableCell[] = [];
         // go through every layout cell.
+        var x: number = 0;
         tableRow.forEach((tableCellId: number) => {
           if (tableCellId === null) {
             // empty layout cells transform into empty render cells.
-            row.push(null);
+            this.layoutCells.push({y: y, x: x, left: 0, top: 0, width: 0, height: 0, tableCell: null});
+            x++;
           } else if (renderedCells.indexOf(tableCellId) === -1) {
             // remember already rendered layout cells.
             renderedCells.push(tableCellId);
+            // get the table cell.
+            var tableCell: ITableCell = this.getTableCell(tableCellId);
             // each layout cell will only be transformed into a render cell once.
-            row.push(this.getTableCell(tableCellId));
+            this.layoutCells.push({y: y, x: x, left: 0, top: 0, width: 0, height: 0, tableCell: tableCell});
+            x += tableCell.colSpan;
           }
         }, this);
         // calculate the maximum number of columns.
-        this.numCols = this.numCols > tableRow.length ? this.numCols : tableRow.length;
+        this.numCols = this.numCols > x ? this.numCols : x;
         // calculate the resulting column width.
         this.colWidth = Math.floor((tableWidth - this.numCols) / this.numCols);
-        // add the generated row to the render-matrix.
-        this.rows.push(row);
       }, this);
+      // calculate the left and width for each layout cell.
+      this.layoutCells.forEach((layoutCell: ILayoutCell): void => {
+        layoutCell.left = layoutCell.x * this.colWidth;
+        layoutCell.width = layoutCell.tableCell ? layoutCell.tableCell.colSpan * this.colWidth : this.colWidth;
+      }, this);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    updateCellHeight(layoutCell: ILayoutCell, height: number): void {
+      // todo
+      console.log('todo');
     }
 
     /**
@@ -347,9 +381,9 @@ module components.tableLayout {
       while (x <= colIndex) {
         if (
           (
-          tableRowIndex === 0 ||
-          this.layout.tableRows[tableRowIndex - 1][tableColIndex] === null ||
-          this.layout.tableRows[tableRowIndex - 1][tableColIndex] !== this.layout.tableRows[tableRowIndex][tableColIndex]
+            tableRowIndex === 0 ||
+            this.layout.tableRows[tableRowIndex - 1][tableColIndex] === null ||
+            this.layout.tableRows[tableRowIndex - 1][tableColIndex] !== this.layout.tableRows[tableRowIndex][tableColIndex]
           )
         ) {
           x++;

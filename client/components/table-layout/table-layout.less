@@ -1,63 +1,53 @@
 table-layout {
   display: block;
-  table {
-    border-spacing: 0;
-    empty-cells: hide;
-    table-layout: fixed;
-    border-collapse: collapse;
-    > tbody {
-      > tr {
-        > td {
-          padding: 0;
-          border: 1px solid transparent;
-          vertical-align: top;
-          &.drag-over-left {
-            border-left: 1px solid red !important;
-          }
-          &.drag-over-top {
-            border-top: 1px solid red !important;
-          }
-          &.drag-over-right {
-            border-right: 1px solid red !important;
-          }
-          &.drag-over-bottom {
-            border-bottom: 1px solid red !important;
-          }
-          &.drag-over-all {
-            border: 1px solid red !important;
-          }
-          > table-layout-cell {
-            display: block;
-            overflow: hidden;
-            min-height: 20px;
-            padding-left: 4px;
-            padding-right: 4px;
-          }
-        }
+  layout {
+    display: block;
+    position: relative;
+    > layout-cell {
+      display: block;
+      position: absolute;
+      overflow: hidden;
+      padding: 0;
+      border: 1px solid transparent;
+      vertical-align: top;
+      &.drag-over-left {
+        border-left: 1px solid red !important;
+      }
+      &.drag-over-top {
+        border-top: 1px solid red !important;
+      }
+      &.drag-over-right {
+        border-right: 1px solid red !important;
+      }
+      &.drag-over-bottom {
+        border-bottom: 1px solid red !important;
+      }
+      &.drag-over-all {
+        border: 1px solid red !important;
+      }
+      > table-layout-cell {
+        display: block;
+        position: relative;
+        overflow: hidden;
+        min-height: 20px;
+        padding-left: 4px;
+        padding-right: 4px;
       }
     }
   }
   .edit-mode {
-    tbody {
-      tr {
-        td {
-          border: 1px dotted #e0e0e0;
-          padding-bottom: 4px;
-          &.selected {
-            background-color: lightpink;
-          }
-        }
+    layout-cell {
+      border: 1px dotted #e0e0e0;
+      padding-bottom: 4px;
+      &.selected {
+        background-color: lightpink;
       }
     }
-    table {
-      tbody {
-        tr {
-          td {
-            border: 1px dashed #e0e0e0;
-            &.selected {
-              background-color: lightpink;
-            }
-          }
+    layout {
+      layout-cell {
+        border: 1px dashed #e0e0e0;
+        &.selected {
+          background-color: lightpink;
         }
       }
     }
