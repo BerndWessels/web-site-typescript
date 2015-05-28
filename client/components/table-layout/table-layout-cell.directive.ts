@@ -38,7 +38,7 @@
                   transclude: ng.ITranscludeFunction): void {
       // watch the cell content.
       scope.$watch((): components.tableLayout.ITableCell => {
-        return <components.tableLayout.ITableCell> (<any>scope).cell;
+        return <components.tableLayout.ITableCell> (<any>scope).layoutCell.tableCell;
       }, (newValue: components.tableLayout.ITableCell, oldValue: components.tableLayout.ITableCell): void => {
         if (newValue) {
           // render the cell template.
@@ -48,6 +48,8 @@
           } else {
             $compile(instanceElement.contents())(scope);
           }
+          //
+          controller.cellElements[(<any>scope).layoutCell.tableCell.id] = instanceElement;
         } else {
           // clear the cell content.
           instanceElement.html('');
@@ -62,9 +64,17 @@
         // let the event finish before messing with the element that triggered it.
         $timeout((): void => {
           // back in the angular world, now remove the cell from the layout.
-          controller.remove((<any>scope).cell.id);
+          controller.remove((<any>scope).layoutCell.tableCell.id);
         }, 0);
       };
+      // watch the cell content.
+      scope.$watch((): number => {
+        return instanceElement.height();
+      }, (newValue: number, oldValue: number): void => {
+        if (!isNaN(newValue)) {
+          controller.updateCells();
+        }
+      });
     }
   }
 

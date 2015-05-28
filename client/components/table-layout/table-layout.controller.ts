@@ -24,13 +24,21 @@ module components.tableLayout {
      */
     tableRows: number[][];
   }
+  /**
+   * This is the structure of the layout cell.
+   */
   export interface ILayoutCell {
+    /**
+     * This is the x position in the layout.
+     */
     x: number;
+    /**
+     * This is the y position in the layout.
+     */
     y: number;
-    left: number;
-    top: number;
-    width: number;
-    height: number;
+    /**
+     * This is the table cell within the layout cell.
+     */
     tableCell: ITableCell;
   }
   /**
@@ -88,6 +96,10 @@ module components.tableLayout {
      */
     layout: ITableLayout;
     /**
+     * This is the collection of cell elements which height needs to be measured.
+     */
+    cellElements: ng.IAugmentedJQuery[];
+    /**
      * This external callback will be called when the user selects a cell.
      *
      * It is bound to the controller by the isolate scope attribute binding.
@@ -134,18 +146,16 @@ module components.tableLayout {
      */
     update(tableWidth: number): void;
     /**
-     * This is called when the height of a cell changes.
-     * @param layoutCell The changing cell.
-     * @param height The new height.
+     * This is called to update the heights of all layout cells.
      */
-    updateCellHeight(layoutCell: ILayoutCell, height: number): void;
+    updateCells(): void;
     /**
      * This is called when content is dropped into the layout.
      *
      * @param rowIndex The row index the content has been dropped on.
      * @param colIndex The column index the content has been dropped on.
      * @param side The side the content has been dropped on.
-     * @param data The content that has been dropped.
+     * @param content The content that has been dropped.
      */
     drop(rowIndex: number, colIndex: number, side: string, content: ITableCellContent): void;
     /**
@@ -167,12 +177,6 @@ module components.tableLayout {
      * @param id The cell identifier.
      */
     getTableCell(id: number): ITableCell;
-    /**
-     * This is called to transform a render-matrix col index into a layout-matrix col index.
-     * @param tableRowIndex The row index.
-     * @param colIndex The render-matrix column index.
-     */
-    colIndexToTableColIndex(tableRowIndex: number, colIndex: number): number;
   }
   /**
    * This is the controller for the table layout directive.
@@ -183,7 +187,7 @@ module components.tableLayout {
      *
      * @type {string[]} Dependencies to be injected.
      */
-    static $inject: string[] = ['$scope'];
+    static $inject: string[] = ['$scope', '$timeout'];
     /**
      * @inheritdoc
      */
@@ -192,6 +196,10 @@ module components.tableLayout {
      * @inheritdoc
      */
     layout: ITableLayout;
+    /**
+     * @inheritdoc
+     */
+    cellElements: ng.IAugmentedJQuery[] = [];
     /**
      * @inheritdoc
      */
@@ -217,6 +225,14 @@ module components.tableLayout {
      */
     layoutCells: ILayoutCell[];
     /**
+     * The render-matrix row tops.
+     */
+    rowTops: number[] = [];
+    /**
+     * The render-matrix row heights.
+     */
+    rowHeights: number[] = [];
+    /**
      * The calculated number of columns in the layout.
      */
     numCols: number;
@@ -237,8 +253,9 @@ module components.tableLayout {
      * This is the constructor that takes the injected dependencies.
      *
      * @param $scope Injected scope dependency.
+     * @param $timeout Injected timeout dependency.
      */
-    constructor(private $scope: ng.IScope) {
+    constructor(private $scope: ng.IScope, private $timeout: ng.ITimeoutService) {
     }
 
     /**
@@ -256,12 +273,10 @@ module components.tableLayout {
     update(tableWidth: number): void {
       // the layout matrix flattens row and col spans,
       // while the render matrix excludes spanned cells.
-      if (tableWidth <= 0) {
+      if (!this.layout || tableWidth <= 0) {
         return;
       }
-      if (!this.layout) {
-        return;
-      }
+      // remember the new table width.
       this.tableWidth = tableWidth;
       // reset the render-matrix.
       this.layoutCells = <ILayoutCell[]> [];
@@ -275,7 +290,11 @@ module components.tableLayout {
         tableRow.forEach((tableCellId: number) => {
           if (tableCellId === null) {
             // empty layout cells transform into empty render cells.
-            this.layoutCells.push({y: y, x: x, left: 0, top: 0, width: 0, height: 0, tableCell: null});
+            this.layoutCells.push({
+              y: y,
+              x: x,
+              tableCell: null
+            });
             x++;
           } else if (renderedCells.indexOf(tableCellId) === -1) {
             // remember already rendered layout cells.
@@ -283,28 +302,90 @@ module components.tableLayout {
             // get the table cell.
             var tableCell: ITableCell = this.getTableCell(tableCellId);
             // each layout cell will only be transformed into a render cell once.
-            this.layoutCells.push({y: y, x: x, left: 0, top: 0, width: 0, height: 0, tableCell: tableCell});
-            x += tableCell.colSpan;
+            this.layoutCells.push({
+              y: y,
+              x: x,
+              tableCell: tableCell
+            });
+            x++;
+          } else if (renderedCells.indexOf(tableCellId) !== -1) {
+            // ignore already rendered layout cells.
+            x++;
           }
         }, this);
         // calculate the maximum number of columns.
         this.numCols = this.numCols > x ? this.numCols : x;
         // calculate the resulting column width.
         this.colWidth = Math.floor((tableWidth - this.numCols) / this.numCols);
+        y++;
       }, this);
-      // calculate the left and width for each layout cell.
-      this.layoutCells.forEach((layoutCell: ILayoutCell): void => {
-        layoutCell.left = layoutCell.x * this.colWidth;
-        layoutCell.width = layoutCell.tableCell ? layoutCell.tableCell.colSpan * this.colWidth : this.colWidth;
-      }, this);
+      // calculate the top and height for each layout cell.
+      this.updateCells();
     }
 
     /**
      * @inheritdoc
      */
-    updateCellHeight(layoutCell: ILayoutCell, height: number): void {
-      // todo
-      console.log('todo');
+    updateCells(): void {
+      // initialize row tops and heights for binding.
+      this.rowTops = _.range(this.layout.tableRows.length + 1).map((): number => {
+        return 0;
+      });
+      this.rowHeights = _.range(this.layout.tableRows.length + 1).map((): number => {
+        return 20;
+      });
+      // go through all cells with row span 1.
+      this.layoutCells.forEach((layoutCell: ILayoutCell, index: number): void => {
+        // get the cells content height.
+        if (layoutCell.tableCell && layoutCell.tableCell.rowSpan === 1) {
+          var cellHeight: number = 20;
+          if (this.cellElements[layoutCell.tableCell.id]) {
+            cellHeight = this.cellElements[layoutCell.tableCell.id].outerHeight();
+            if (cellHeight === 0) {
+              this.$timeout((): void => {
+                this.updateCells();
+              });
+            }
+          }
+          // update the row height.
+          this.rowHeights[layoutCell.y] = Math.max(this.rowHeights[layoutCell.y], cellHeight);
+        }
+      }, this);
+      // go through all cells with row span greater than 1.
+      this.layoutCells.forEach((layoutCell: ILayoutCell, index: number): void => {
+        // get the cells content height.
+        if (layoutCell.tableCell && layoutCell.tableCell.rowSpan > 1) {
+          var cellHeight: number = 20;
+          if (this.cellElements[layoutCell.tableCell.id]) {
+            cellHeight = this.cellElements[layoutCell.tableCell.id].outerHeight();
+            if (cellHeight === 0) {
+              this.$timeout((): void => {
+                this.updateCells();
+              });
+            } else {
+              // calculate the total height of the spanned rows.
+              var spannedHeight: number = 0;
+              for (var y: number = 0; y < layoutCell.tableCell.rowSpan; y++) {
+                spannedHeight += this.rowHeights[layoutCell.y + y];
+              }
+              // increase the height of the spanned rows to accommodate the spanned cell.
+              if (spannedHeight < cellHeight) {
+                var addHeight: number = Math.ceil((cellHeight - spannedHeight) / layoutCell.tableCell.rowSpan);
+                for (y = 0; y < layoutCell.tableCell.rowSpan; y++) {
+                  this.rowHeights[layoutCell.y + y] = this.rowHeights[layoutCell.y + y] + addHeight;
+                }
+              }
+            }
+          }
+        }
+      }, this);
+      // calculate the row tops.
+      for (var r: number = 0; r < this.layout.tableRows.length; r++) {
+        this.rowTops[r + 1] = this.rowTops[r] + this.rowHeights[r];
+      }
+      // set the new height of the layout for binding.
+      this.tableHeight = this.rowTops[r - 1] + this.rowHeights[r - 1] + 1;
+      console.log(this.rowTops);
     }
 
     /**
@@ -314,7 +395,7 @@ module components.tableLayout {
       // remember cells with already extended colSpan.
       var extendedCells: number[] = [];
       // iterate through all rows.
-      this.layout.tableRows.forEach((tableRow: number[], y: number) => {
+      this.layout.tableRows.forEach((tableRow: number[]) => {
         // dropping at the start/end is always a simple insert/append.
         if (tableColIndex === 0 || tableColIndex === tableRow.length) {
           tableRow.splice(tableColIndex, 0, null);
@@ -374,30 +455,7 @@ module components.tableLayout {
     /**
      * @inheritdoc
      */
-    colIndexToTableColIndex(tableRowIndex: number, colIndex: number): number {
-      // transform the colIndex into a tableColIndex.
-      var tableColIndex: number = 0;
-      var x: number = 0;
-      while (x <= colIndex) {
-        if (
-          (
-            tableRowIndex === 0 ||
-            this.layout.tableRows[tableRowIndex - 1][tableColIndex] === null ||
-            this.layout.tableRows[tableRowIndex - 1][tableColIndex] !== this.layout.tableRows[tableRowIndex][tableColIndex]
-          )
-        ) {
-          x++;
-        }
-        var tableCellId: number = this.layout.tableRows[tableRowIndex][tableColIndex];
-        tableColIndex += tableCellId ? this.getTableCell(tableCellId).colSpan : 1;
-      }
-      return --tableColIndex;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    drop(tableRowIndex: number, colIndex: number, side: string, content: ITableCellContent): void {
+    drop(tableRowIndex: number, tableColIndex: number, side: string, content: ITableCellContent): void {
       // add the new table cell to the layout.
       var newCell: ITableCell = {
         id: new Date().getTime(),
@@ -410,8 +468,6 @@ module components.tableLayout {
       if (this.addedContent) {
         this.addedContent(this.layout, newCell);
       }
-      // transform the colIndex into a tableColIndex.
-      var tableColIndex: number = this.colIndexToTableColIndex(tableRowIndex, colIndex);
       // check if we are dropping onto an empty cell.
       if (this.layout.tableRows[tableRowIndex][tableColIndex]) {
         // choose the algorithm for the drop side.
@@ -440,6 +496,11 @@ module components.tableLayout {
             }
             break;
           case 'right':
+            // right align the tableColIndex to spanned cells.
+            if (this.layout.tableRows[tableRowIndex][tableColIndex]) {
+              var tableCell: ITableCell = this.getTableCell(this.layout.tableRows[tableRowIndex][tableColIndex]);
+              tableColIndex += tableCell.colSpan - 1;
+            }
             // check if we drop at the end.
             if (tableColIndex === this.layout.tableRows[tableRowIndex].length) {
               // append a new column after the drop column.
@@ -559,7 +620,7 @@ module components.tableLayout {
       var removeRows: number[] = [];
       this.layout.tableRows.forEach((tableRow: number[], y: number): void => {
         var isEmpty: boolean = true;
-        tableRow.forEach((id: number, x: number): void => {
+        tableRow.forEach((id: number): void => {
           if (id !== null) {
             isEmpty = false;
           }

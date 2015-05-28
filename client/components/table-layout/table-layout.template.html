@@ -2,16 +2,23 @@
   ng-class="{'edit-mode': vm.editMode}"
   ng-style="{height: vm.tableHeight}">
   <layout-cell
-    ng-repeat="layoutCell in layoutCells track by $index"
-    ng-style="{left: layoutCell.left, top: layoutCell.top, height: layoutCell.height}"
-    ng-class="{selected: layoutCell.tableCell !== null && layoutCell.tableCell.id === vm.layout.selectedlayoutCell.tableCell.id}"
-    table-layout-drop="vm.layout.layoutCell.tableCellType">
+    title="{{vm.rowTops[layoutCell.y + (layoutCell.tableCell ? layoutCell.tableCell.rowSpan : 1)] - vm.rowTops[layoutCell.y]}}"
+    ng-repeat="layoutCell in vm.layoutCells track by $index"
+    ng-style="{
+    left: layoutCell.x * (vm.colWidth + 1),
+    top: vm.rowTops[layoutCell.y],
+    height: vm.rowTops[layoutCell.y + (layoutCell.tableCell ? layoutCell.tableCell.rowSpan : 1)] - vm.rowTops[layoutCell.y]
+    }"
+    ng-class="{selected: layoutCell.tableCell !== null && layoutCell.tableCell.id === vm.layout.selectedCell.id}"
+    table-layout-drop="vm.layout.cellType">
     <table-layout-cell
-      ng-style="{width: layoutCell.tableCell ? (layoutCell.tableCell.colSpan * vm.colWidth) + (layoutCell.tableCell.colSpan - 1) : vm.colWidth}"
-      draggable="{{vm.editMode}}"
+      ng-style="{
+      width: layoutCell.tableCell ? (layoutCell.tableCell.colSpan * vm.colWidth) + (layoutCell.tableCell.colSpan - 1) : vm.colWidth
+      }"
+      draggable="{{vm.editMode && layoutCell.tableCell !== null}}"
       drag-start="dragStart"
       drag-effect="'move'"
-      drag-type="vm.layout.layoutCell.tableCellType"
+      drag-type="vm.layout.cellType"
       drag-data="layoutCell.tableCell.content">
     </table-layout-cell>
   </layout-cell>

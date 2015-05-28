@@ -46,6 +46,9 @@
           return;
         }
         var data: components.tableLayout.ITableCellContent = dragDropService.getData();
+        if (!data) {
+          return;
+        }
         if (controller.allowContent(controller.layout, data)) {
           return;
         }
@@ -65,6 +68,9 @@
           return;
         }
         var data: any = dragDropService.getData();
+        if (!data) {
+          return;
+        }
         if (controller.allowContent(controller.layout, data)) {
           return;
         }
@@ -72,8 +78,8 @@
         var dragEvent: DragEvent = <any> eventObject;
         if (dragEvent.dataTransfer.effectAllowed === 'move') {
           instanceElement.removeClass('drag-over-left drag-over-top drag-over-right drag-over-bottom drag-over-all');
-          var tableRowIndex: number = (<any>scope).$parent.$index;
-          var tableColIndex: number = controller.colIndexToTableColIndex(tableRowIndex, (<any>scope).$index);
+          var tableRowIndex: number = (<any>scope).layoutCell.y;
+          var tableColIndex: number = (<any>scope).layoutCell.x;
           if (controller.layout.tableRows[tableRowIndex][tableColIndex]) {
             var side: string = calcSide(instanceElement, eventObject);
             switch (side) {
@@ -107,6 +113,9 @@
           return;
         }
         data = dragDropService.getData();
+        if (!data) {
+          return;
+        }
         if (controller.allowContent(controller.layout, data)) {
           return;
         }
@@ -126,6 +135,9 @@
           return;
         }
         data = dragDropService.getData();
+        if (!data) {
+          return;
+        }
         if (controller.allowContent(controller.layout, data)) {
           return;
         }
@@ -136,7 +148,7 @@
           data = dragDropService.getData();
           var side: string = calcSide(instanceElement, eventObject);
           scope.$apply((): void => {
-            controller.drop((<any>scope).$parent.$index, (<any>scope).$index, side, data);
+            controller.drop((<any>scope).layoutCell.y, (<any>scope).layoutCell.x, side, data);
           });
           dragEvent.preventDefault();
         }
@@ -150,9 +162,9 @@
         scope.$apply((): void => {
           var deselect: boolean = eventObject.ctrlKey;
           if (controller.selectCell) {
-            controller.selectCell(controller.layout, deselect ? null : (<any>scope).cell);
+            controller.selectCell(controller.layout, deselect ? null : (<any>scope).layoutCell.tableCell);
           } else {
-            controller.layout.selectedCell = deselect ? null : angular.copy((<any>scope).cell);
+            controller.layout.selectedCell = deselect ? null : angular.copy((<any>scope).layoutCell.tableCell);
           }
         });
         eventObject.preventDefault();

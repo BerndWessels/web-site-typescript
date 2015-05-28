@@ -5,17 +5,15 @@
   'use strict';
   /**
    * This is the dependency injection for the class constructor.
-   *
    * @type {string[]} Dependencies to be injected.
    */
-  directive.$inject = ['$interval'];
+  directive.$inject = ['$window'];
   /**
    * This is the directive constructor that takes the injected dependencies.
-   *
-   * @param $interval Injected interval service dependency.
+   * @param $window Injected interval service dependency.
    * @returns {ng.IDirective}
    */
-  function directive($interval: ng.IIntervalService): ng.IDirective {
+  function directive($window: ng.IWindowService): ng.IDirective {
     return <ng.IDirective> {
       restrict: 'EAC',
       scope: {
@@ -35,7 +33,6 @@
     };
     /**
      * This is the directives link functions.
-     *
      * @param scope
      * @param instanceElement
      * @param instanceAttributes
@@ -68,16 +65,13 @@
         }
       }, true);
       // update the render-matrix whenever the table-layout width changes.
-      var width: number = 0;
-      var interval: ng.IPromise<any> = $interval((): void => {
-        var newWidth: number = instanceElement.innerWidth();
-        if (width !== newWidth) {
-          width = newWidth;
-          controller.update(width);
-        }
-      }, 100);
-      scope.$on('$destroy', (): void => {
-        $interval.cancel(interval);
+      scope.$watch((): any => {
+        return instanceElement.innerWidth();
+      }, (newValue: any, oldValue: any) => {
+        controller.update(newValue);
+      });
+      angular.element($window).bind('resize', (): void => {
+        scope.$apply();
       });
     }
   }

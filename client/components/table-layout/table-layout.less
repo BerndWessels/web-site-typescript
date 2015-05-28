@@ -1,5 +1,7 @@
 table-layout {
   display: block;
+  border-left: 1px solid transparent;
+  border-top: 1px solid transparent;
   layout {
     display: block;
     position: relative;
@@ -8,7 +10,8 @@ table-layout {
       position: absolute;
       overflow: hidden;
       padding: 0;
-      border: 1px solid transparent;
+      border-right: 1px solid transparent;
+      border-bottom: 1px solid transparent;
       vertical-align: top;
       &.drag-over-left {
         border-left: 1px solid red !important;
@@ -36,16 +39,22 @@ table-layout {
     }
   }
   .edit-mode {
+    border-left: 1px dotted #e0e0e0;
+    border-top: 1px dotted #e0e0e0;
     layout-cell {
-      border: 1px dotted #e0e0e0;
+      border-right: 1px dotted #e0e0e0;
+      border-bottom: 1px dotted #e0e0e0;
       padding-bottom: 4px;
       &.selected {
         background-color: lightpink;
       }
     }
     layout {
+      border-left: 1px dashed #e0e0e0;
+      border-top: 1px dashed #e0e0e0;
       layout-cell {
-        border: 1px dashed #e0e0e0;
+        border-right: 1px dashed #e0e0e0;
+        border-bottom: 1px dashed #e0e0e0;
         &.selected {
           background-color: lightpink;
         }
