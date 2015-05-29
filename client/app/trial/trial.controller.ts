@@ -26,9 +26,11 @@ module app.trial {
     tableLayout: components.tableLayout.ITableLayout;
     fieldSets: IFieldSet[];
     fields: IField[];
+    groupFields: boolean;
     groupedFields: any;
     usedFields: IUsedField[];
     selectedCell: components.tableLayout.ITableCell;
+    selectedLayout: components.tableLayout.ITableLayout;
     addFieldSet(): void;
     getEmptyTableLayout(cellType: string): components.tableLayout.ITableLayout;
     compileTableLayoutCellTemplate(element: JQuery): void;
@@ -44,9 +46,11 @@ module app.trial {
     tableLayout: components.tableLayout.ITableLayout;
     fieldSets: IFieldSet[];
     fields: IField[];
+    groupFields: boolean = false;
     groupedFields: any;
     usedFields: IUsedField[];
     selectedCell: components.tableLayout.ITableCell;
+    selectedLayout: components.tableLayout.ITableLayout;
     addFieldSet: () => void;
     compileTableLayoutCellTemplate: (element: JQuery) => void;
     selectCell: (layout: components.tableLayout.ITableLayout, cell: components.tableLayout.ITableCell) => void;
@@ -70,9 +74,10 @@ module app.trial {
           this.fieldSets.forEach((fieldset: IFieldSet): void => {
             fieldset.data.layout.selectedCell = null;
           });
-          var selectedCell: components.tableLayout.ITableCell = angular.copy(cell);
+          var selectedCell: components.tableLayout.ITableCell = cell; // angular.copy(cell);
           layout.selectedCell = selectedCell;
           this.selectedCell = selectedCell;
+          this.selectedLayout = selectedCell ? layout : null;
         }
       };
 
@@ -144,7 +149,7 @@ module app.trial {
         {id: 2, template: components.formLayout.fieldTemplate, data: {category: 'Even', label: 'Two', value: '2'}},
         {id: 3, template: components.formLayout.fieldTemplate, data: {category: 'Odd', label: 'Three', value: '3'}},
         {id: 4, template: components.formLayout.fieldTemplate, data: {category: 'Even', label: 'Four', value: '4'}},
-        {id: 5, template: components.formLayout.fieldTemplate, data: {category: 'Odd', label: 'Five', value: '5'}},
+        {id: 5, template: components.formLayout.checkboxFieldTemplate, data: {category: 'Odd', label: 'Five', value: '5'}},
         {id: 6, template: components.formLayout.fieldTemplate, data: {category: 'Even', label: 'Six', value: '6'}},
         {id: 7, template: components.formLayout.fieldTemplate, data: {category: 'Odd', label: 'Seven', value: '7'}},
         {id: 8, template: components.formLayout.fieldTemplate, data: {category: 'Even', label: 'Eight', value: '8'}},
@@ -170,7 +175,7 @@ module app.trial {
         tableRows: [[null]]
       };
     }
-
   }
+
   angular.module('app').controller('app.trial.TrialController', TrialController);
 }

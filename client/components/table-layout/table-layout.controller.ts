@@ -385,7 +385,6 @@ module components.tableLayout {
       }
       // set the new height of the layout for binding.
       this.tableHeight = this.rowTops[r - 1] + this.rowHeights[r - 1] + 1;
-      console.log(this.rowTops);
     }
 
     /**
@@ -666,8 +665,6 @@ module components.tableLayout {
     updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void {
       // update the cell's row and column span.
       var tableCell: ITableCell = this.getTableCell(this.layout.selectedCell.id);
-      tableCell.colSpan += diffColSpan;
-      tableCell.rowSpan += diffRowSpan;
       // find the cell's row and col index.
       var tableColIndex: number = null;
       var tableRowIndex: number = null;

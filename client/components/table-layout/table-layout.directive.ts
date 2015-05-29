@@ -10,7 +10,7 @@
   directive.$inject = ['$window'];
   /**
    * This is the directive constructor that takes the injected dependencies.
-   * @param $window Injected interval service dependency.
+   * @param $window Injected window service dependency.
    * @returns {ng.IDirective}
    */
   function directive($window: ng.IWindowService): ng.IDirective {
@@ -53,20 +53,27 @@
         }
       });
       // update the selected cell span whenever it changes.
-      scope.$watch((): any => {
+      scope.$watch((): components.tableLayout.ITableCell => {
         return controller.layout ? controller.layout.selectedCell : null;
-      }, (newValue: any, oldValue: any) => {
-        if (newValue && oldValue && newValue.id === oldValue.id && newValue.colSpan && newValue.rowSpan) {
-          var tableCell: components.tableLayout.ITableCell = controller.getTableCell(newValue.id);
+      }, (newValue: components.tableLayout.ITableCell, oldValue: components.tableLayout.ITableCell) => {
+        if (newValue && oldValue && newValue.id === oldValue.id) {
           controller.updateSelectedSpan(
-            newValue.colSpan - tableCell.colSpan,
-            newValue.rowSpan - tableCell.rowSpan
+            newValue.colSpan - oldValue.colSpan,
+            newValue.rowSpan - oldValue.rowSpan
           );
         }
       }, true);
       // update the render-matrix whenever the table-layout width changes.
       scope.$watch((): any => {
-        return instanceElement.innerWidth();
+        // test the current layout width.
+        var newWidth: number = instanceElement.innerWidth();
+        // trigger another test in case the element will resize later in this digest cycle.
+        setTimeout((): void => {
+          if (newWidth !== instanceElement.innerWidth()) {
+            scope.$apply();
+          }
+        });
+        return newWidth;
       }, (newValue: any, oldValue: any) => {
         controller.update(newValue);
       });

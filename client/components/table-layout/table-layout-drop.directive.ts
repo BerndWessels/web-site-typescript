@@ -164,7 +164,7 @@
           if (controller.selectCell) {
             controller.selectCell(controller.layout, deselect ? null : (<any>scope).layoutCell.tableCell);
           } else {
-            controller.layout.selectedCell = deselect ? null : angular.copy((<any>scope).layoutCell.tableCell);
+            controller.layout.selectedCell = deselect ? null : (<any>scope).layoutCell.tableCell;
           }
         });
         eventObject.preventDefault();
