@@ -1,0 +1,106 @@
+<legend>Account Search</legend>
+<table class="table table-striped table-hover">
+  <tr class="form-group form-group-sm">
+    <td colspan="2">
+      <span>layout related stuff</span>
+    </td>
+  </tr>
+</table>
+<legend style="font-size: 16px;">Selected Cell</legend>
+<table class="table table-striped table-hover">
+  <tr class="form-group form-group-sm" ng-if="!vm.selected.cell">
+    <td colspan="2">
+      <span>No cell selected!</span>
+    </td>
+  </tr>
+  <tr class="form-group form-group-sm" ng-if="vm.selected.cell">
+    <td>
+      <span>{{vm.selected.layout.cellType}}</span>
+    </td>
+    <td>
+      <input class="form-control" style="width: 100px;"
+             type="text"
+             ng-if="vm.selected.layout.cellType === 'fieldset'"
+             ng-model="vm.selected.cell.content.data.legend"/>
+              <span ng-if="vm.selected.layout.cellType === 'field'">
+                {{vm.selected.cell.content.data.label}}
+              </span>
+    </td>
+  </tr>
+  <tr class="form-group form-group-sm">
+    <td style="vertical-align: middle;">
+      <span>Row Span</span>
+    </td>
+    <td style="vertical-align: middle;">
+      <input class="form-control" style="width: 40px;"
+             type="number" ng-disabled="!vm.selected.cell"
+             ng-model="vm.selected.cell.rowSpan" min="1"/>
+    </td>
+  </tr>
+  <tr class="form-group form-group-sm">
+    <td style="vertical-align: middle;">
+      <span>Column Span</span>
+    </td>
+    <td style="vertical-align: middle;">
+      <input class="form-control" style="width: 40px;"
+             type="number" ng-disabled="!vm.selected.cell"
+             ng-model="vm.selected.cell.colSpan" min="1"/>
+    </td>
+  </tr>
+</table>
+<legend style="font-size: 16px;">Field Sets</legend>
+<div class="form-group form-group-sm">
+  <button class="btn btn-sm btn-default pull-right" ng-click="vm.addFieldSet()"
+          style="margin-bottom: 2px;">
+    <span class="icon-playlist-add"></span>
+  </button>
+</div>
+<table class="table table-striped table-hover">
+  <tr ng-repeat="fieldSet in vm.fieldSets" class="form-group form-group-sm"
+      draggable="true" drag-effect="'move'" drag-type="'fieldset'" drag-data="fieldSet">
+    <td style="width: 30px;">
+      <span class="icon-view-quilt"></span>
+    </td>
+    <td>
+      <span>{{fieldSet.data.legend}}</span>
+    </td>
+  </tr>
+</table>
+<legend style="font-size: 16px;">Fields</legend>
+<div class="form-group form-group-sm">
+  <div class="btn-group pull-right">
+    <label class="btn btn-sm" ng-model="vm.groupFields" btn-radio="false"><span
+      class="icon-filter-list"></span></label>
+    <label class="btn btn-sm" ng-model="vm.groupFields" btn-radio="true"><span
+      class="icon-list"></span></label>
+  </div>
+</div>
+<table class="table table-striped table-hover" ng-if="!vm.groupFields">
+  <tr class="form-group form-group-sm" ng-repeat="field in vm.fields"
+      draggable="true" drag-effect="'move'" drag-type="'field'" drag-data="field">
+    <td style="width: 30px;">
+      <span class="icon-subtitles"></span>
+    </td>
+    <td>
+      <span>{{field.data.label}}</span>
+    </td>
+  </tr>
+</table>
+<table class="table table-striped" ng-if="vm.groupFields" ng-repeat="group in vm.groupedFields">
+  <tr>
+    <td colspan="2">
+      <span>{{group.category}}</span>
+    </td>
+  </tr>
+  <tr class="form-group form-group-sm" ng-repeat="field in group.fields"
+      draggable="true"
+      drag-effect="'move'" drag-type="'field'"
+      drag-data="field">
+    <td style="width: 30px;">
+      <span class="icon-subtitles"></span>
+    </td>
+    <td>
+      <span>{{field.data.label}}</span>
+    </td>
+  </tr>
+</table>

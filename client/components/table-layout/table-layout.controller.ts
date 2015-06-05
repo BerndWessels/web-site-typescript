@@ -80,6 +80,19 @@ module components.tableLayout {
     template: string;
   }
   /**
+   * This is the structure to expose the selected cell via binding.
+   */
+  export interface ISelected {
+    /**
+     * This is the selected cell.
+     */
+    cell: ITableCell;
+    /**
+     * This ins the selected layout.
+     */
+    layout: ITableLayout;
+  }
+  /**
    * This is the structure of the table layout controller.
    */
   export interface ITableLayoutController {
@@ -170,7 +183,7 @@ module components.tableLayout {
      * @param diffColSpan The change in column span.
      * @param diffRowSpan The change in row span.
      */
-    updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void;
+    updateSelectedSpan(newColSpan: number, newRowSpan: number): void;
     /**
      * This is called to get the cell for a given  cell id.
      *
@@ -662,9 +675,15 @@ module components.tableLayout {
     /**
      * @inheritdoc
      */
-    updateSelectedSpan(diffColSpan: number, diffRowSpan: number): void {
+    updateSelectedSpan(newColSpan: number, newRowSpan: number): void {
       // update the cell's row and column span.
       var tableCell: ITableCell = this.getTableCell(this.layout.selectedCell.id);
+      // calculate the diffs.
+      var diffColSpan: number = newColSpan - tableCell.colSpan;
+      var diffRowSpan: number = newRowSpan - tableCell.rowSpan;
+      // update the spans.
+      tableCell.colSpan = newColSpan;
+      tableCell.rowSpan = newRowSpan;
       // find the cell's row and col index.
       var tableColIndex: number = null;
       var tableRowIndex: number = null;

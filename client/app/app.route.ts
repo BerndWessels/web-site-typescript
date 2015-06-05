@@ -5,14 +5,14 @@
     $routeProvider.when(
       '/', {
         template: app.appTemplate,
-        controller: app.AppController,
-        controllerAs: 'vm'
+        controller: 'app.AppController',
+        controllerAs: 'appCtrl'
       }
     ).when(
-      '/trial', {
-        template: app.trial.trialTemplate,
-        controller: app.trial.TrialController,
-        controllerAs: 'trialCtrl'
+      '/accounts', {
+        template: app.accounts.accountsTemplate,
+        controller: 'app.accounts.AccountsController',
+        controllerAs: 'accountsCtrl'
       }
     );
   }

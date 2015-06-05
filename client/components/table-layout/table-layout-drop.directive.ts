@@ -161,10 +161,16 @@
         // select or deselect the cell.
         scope.$apply((): void => {
           var deselect: boolean = eventObject.ctrlKey;
+          var selectCell: components.tableLayout.ITableCell = {
+            id: (<any>scope).layoutCell.tableCell.id,
+            rowSpan: (<any>scope).layoutCell.tableCell.rowSpan,
+            colSpan: (<any>scope).layoutCell.tableCell.colSpan,
+            content: (<any>scope).layoutCell.tableCell.content
+          };
           if (controller.selectCell) {
-            controller.selectCell(controller.layout, deselect ? null : (<any>scope).layoutCell.tableCell);
+            controller.selectCell(controller.layout, deselect ? null : selectCell);
           } else {
-            controller.layout.selectedCell = deselect ? null : (<any>scope).layoutCell.tableCell;
+            controller.layout.selectedCell = deselect ? null : selectCell;
           }
         });
         eventObject.preventDefault();

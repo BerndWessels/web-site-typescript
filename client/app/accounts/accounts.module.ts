@@ -1,6 +1,6 @@
 ((): void => {
   'use strict';
-  angular.module('app.trial', [
+  angular.module('app.accounts', [
     'app.core'
   ]);
 })();

@@ -1,10 +1,10 @@
 module app {
   'use strict';
-  export interface IAppController {
+  interface IAppController {
     fullName: string;
     lastName: string;
   }
-  export class AppController implements IAppController {
+  class AppController implements IAppController {
     static $inject: string[] = [];
     fullName: string;
     lastName: string;

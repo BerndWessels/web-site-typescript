@@ -56,10 +56,12 @@
       scope.$watch((): components.tableLayout.ITableCell => {
         return controller.layout ? controller.layout.selectedCell : null;
       }, (newValue: components.tableLayout.ITableCell, oldValue: components.tableLayout.ITableCell) => {
-        if (newValue && oldValue && newValue.id === oldValue.id) {
+        if (newValue && oldValue && newValue.id === oldValue.id
+          && newValue.colSpan !== null && newValue.rowSpan !== null
+          && !isNaN(newValue.colSpan) && !isNaN(newValue.rowSpan)) {
           controller.updateSelectedSpan(
-            newValue.colSpan - oldValue.colSpan,
-            newValue.rowSpan - oldValue.rowSpan
+            newValue.colSpan,
+            newValue.rowSpan
           );
         }
       }, true);

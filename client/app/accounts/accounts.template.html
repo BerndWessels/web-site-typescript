@@ -1,0 +1,34 @@
+<accounts style="padding: 10px;">
+  <div class="container">
+    <div class="row">
+      <div
+        ng-class="{'col-xs-8': accountsCtrl.accountSearchFormLayout.editMode, 'col-xs-12': !accountsCtrl.accountSearchFormLayout.editMode}">
+        <legend>
+          <span>Account Search</span>
+          <span class="icon-settings pull-right"
+                style="font-size: 14px;"
+                ng-style="{color: accountsCtrl.accountSearchFormLayout.editMode ? '' : '#aaa'}"
+                ng-model="accountsCtrl.accountSearchFormLayout.editMode"
+                btn-checkbox></span>
+        </legend>
+        <form-layout
+          edit-mode="accountsCtrl.accountSearchFormLayout.editMode"
+          layout="accountsCtrl.accountSearchFormLayout.layout"
+          field-sets="accountsCtrl.accountSearchFormLayout.fieldSets"
+          fields="accountsCtrl.accountSearchFormLayout.fields"
+          selected="accountsCtrl.accountSearchFormLayout.selected">
+        </form-layout>
+      </div>
+      <div ng-class="{'col-xs-4': accountsCtrl.accountSearchFormLayout.editMode}"
+           ng-if="accountsCtrl.accountSearchFormLayout.editMode">
+        <form-properties
+          edit-mode="accountsCtrl.accountSearchFormLayout.editMode"
+          layout="accountsCtrl.accountSearchFormLayout.layout"
+          field-sets="accountsCtrl.accountSearchFormLayout.fieldSets"
+          fields="accountsCtrl.accountSearchFormLayout.fields"
+          selected="accountsCtrl.accountSearchFormLayout.selected">
+        </form-properties>
+      </div>
+    </div>
+  </div>
+</accounts>
