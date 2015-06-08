@@ -180,8 +180,8 @@ module components.tableLayout {
     /**
      * This is called when the row or column span of the selected cell has changed.
      *
-     * @param diffColSpan The change in column span.
-     * @param diffRowSpan The change in row span.
+     * @param newColSpan The change in column span.
+     * @param newRowSpan The change in row span.
      */
     updateSelectedSpan(newColSpan: number, newRowSpan: number): void;
     /**

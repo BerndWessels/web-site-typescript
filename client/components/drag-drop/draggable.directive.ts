@@ -1,16 +1,38 @@
+/**
+ * This is a component that enables drag and drop support.
+ */
 /* tslint:disable:no-string-literal */
 ((): void => {
   'use strict';
+  /**
+   * This is the dependency injection for the class constructor.
+   * @type {string[]} Dependencies to be injected.
+   */
   directive.$inject = ['$parse', 'dragDropService'];
+  /**
+   * This is the directive constructor that takes the injected dependencies.
+   * @param $parse Injected parse service dependency.
+   * @param dragDropService Injected drag drop service dependency.
+   * @returns {ng.IDirective}
+   */
   function directive($parse: ng.IParseService, dragDropService: components.dragDrop.IDragDropService): ng.IDirective {
     return <ng.IDirective> {
       priority: -1000,
       restrict: 'A',
       link: link
     };
+    /**
+     * This is the directives link functions.
+     * @param scope
+     * @param instanceElement
+     * @param instanceAttributes
+     * @param controller
+     * @param transclude
+     */
     function link(scope: ng.IScope,
                   instanceElement: ng.IAugmentedJQuery,
                   instanceAttributes: ng.IAttributes): void {
+      // handle the drag start event.
       instanceElement.on('dragstart', (eventObject: JQueryEventObject): any => {
         var dragEvent: DragEvent = <any> eventObject;
         var dragEffect: string = $parse(instanceAttributes['dragEffect'])(scope);
@@ -28,6 +50,7 @@
         eventObject.stopPropagation();
         return false;
       });
+      // handle the drag end event.
       instanceElement.on('dragend', (eventObject: JQueryEventObject): any => {
         var dragEffect: string = $parse(instanceAttributes['dragEffect'])(scope);
         var dragType: string = $parse(instanceAttributes['dragType'])(scope);
@@ -45,6 +68,7 @@
     }
   }
 
+  // register the directive.
   angular.module('dragDrop').directive('draggable', directive);
 })();
 

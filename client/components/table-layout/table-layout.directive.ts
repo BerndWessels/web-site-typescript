@@ -79,6 +79,7 @@
       }, (newValue: any, oldValue: any) => {
         controller.update(newValue);
       });
+      // digest the change in window size.
       angular.element($window).bind('resize', (): void => {
         scope.$apply();
       });

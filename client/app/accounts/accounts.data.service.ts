@@ -54,7 +54,7 @@ module app.accounts {
     getAccountSearchFormLayout(id: number): ng.IPromise<components.formLayout.IFormLayout> {
       // return the form layout from an API call. // todo API instead of FAKE here please.
       var deferredResult: ng.IDeferred<components.formLayout.IFormLayout> = this.$q.defer<components.formLayout.IFormLayout>();
-      var formLayout: components.formLayout.IFormLayout = {
+      var formLayout: components.formLayout.IFormLayout = <components.formLayout.IFormLayout> {
         editMode: false,
         layout: this.getEmptyTableLayout('fieldset'),
         fieldSets: [

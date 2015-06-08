@@ -28,6 +28,7 @@ module app.accounts {
      * This is the constructor that takes the injected dependencies.
      *
      * @param $q Injected promise service dependency.
+     * @param accountDataService Injected account data service dependency.
      */
     constructor(private $q: ng.IQService, private accountDataService: IAccountsDataService) {
       // use the view model for this controller.
