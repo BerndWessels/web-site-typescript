@@ -10,6 +10,7 @@
     'formLayout',
     'formProperties',
     'dragDrop',
-    'ui.bootstrap'
+    'ui.bootstrap',
+    'selectInput'
   ]);
 })();

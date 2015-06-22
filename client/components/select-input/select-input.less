@@ -1,0 +1,52 @@
+.input-group > select-input-compiled {
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}
+
+.input-group-sm > select-input-compiled {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+}
+
+select-input-compiled {
+  position: relative !important;
+  height: auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+
+select-input-compiled.focus {
+  @color-rgba: rgba(red(@input-border-focus), green(@input-border-focus), blue(@input-border-focus), .6);
+  border-color: @input-border-focus !important;
+  outline: 0 !important;
+  .box-shadow(~"inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px @{color-rgba}");
+}
+
+select-input-compiled > selected-option {
+  margin-right: 6px;
+  text-decoration: underline;
+}
+
+select-input-compiled > selected-option:focus {
+  color: red;
+}
+
+select-input-compiled > input {
+  border: none !important;
+  background-color: transparent;
+  flex: auto;
+  min-width: 200px;
+}
+
+select-input-filtered-options > filtered-option {
+  display: block;
+  padding: 4px;
+}
+
+select-input-filtered-options > filtered-option.focused {
+  background-color: #c0cae7;
+}
+
+select-input-filtered-options > filtered-option:hover {
+  background-color: #d3defb;
+}
