@@ -49,23 +49,42 @@ module app.accounts {
       // use the view model for this controller.
       var vm: IAccountsController = <any>this;
 
-
-      vm.selectedOptions = [];
-      vm.options = [
+      var dbOptions: any[] = [
         {id: 10, name: 'Bernd', email: 'b@w.de'},
         {id: 11, name: 'Bent', email: 'b@w.de'},
         {id: 12, name: 'Werber', email: 'b@w.com'},
         {id: 13, name: 'Wessels', email: 'b@w.com'}
       ];
+
+      vm.selectedOptions = [{id: 11, name: 'Bent', email: 'b@w.de'}, {id: 12, name: 'Werber', email: 'b@w.com'}];
+      vm.options = dbOptions;
       vm.filter = '';
 
-      // item.name group by item.email for item in items track by item.id
+
+      $scope.$watch((): any => {
+          return vm.filter;
+        },
+        (newValue: any, oldValue: any): void => {
+          if (newValue !== oldValue) {
+            vm.options = _.filter(dbOptions, _.bind((option: any): any => {
+              if (option.name.toLowerCase().indexOf(vm.filter.toLowerCase()) > -1) {
+                // if (!_.some(vm.selectedOptions, (exclude: any): boolean => {
+                //    return exclude.name === option.name;
+                //   })) {
+                //   return true;
+                // }
+                return true;
+              }
+              return false;
+            }, this));
+          }
+        });
 
 
       vm.optionsModel = {
         // required properties.
         filteredOptions: [],
-        selectedOptions: [],
+        selectedOptions: [{id: 11, name: 'Bent', email: 'b@w.de'}, {id: 12, name: 'Werber', email: 'b@w.com'}],
         filter: '',
         // customization.
         options: [],

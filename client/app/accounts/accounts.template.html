@@ -2,22 +2,35 @@
   <div class="container">
     <form>
       <div class="row">
+        <!--
+        <select ng-options="option.name for option in accountsCtrl.options track by option.id" ng-model="accountsCtrl.selectedOptionsX" multiple></select>
+        <br/><br/>
+        -->
         <select-input class="form-control input-sm"
                       ng-model="accountsCtrl.selectedOptions"
-                      options="item.name group by item.email for item in options track by item.id"
-                      filter="accountCtrl.filter">
+                      options="option.name for option in accountsCtrl.options track by option.id"
+                      filter="accountsCtrl.filter"
+                      list-selected="false">
         </select-input>
+        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+        <!--
+        <div>O: {{accountsCtrl.options}}</div>
+        <div>S: {{accountsCtrl.selectedOptions}}</div>
+        <div>F: {{accountsCtrl.filter}}</div>
+        -->
       </div>
+      <!--
       <div class="row">
         <div
           ng-class="{'col-xs-8': accountsCtrl.accountSearchFormLayout.editMode, 'col-xs-12': !accountsCtrl.accountSearchFormLayout.editMode}">
           <legend>
             <span>Account Search</span>
-          <span class="icon-settings pull-right"
-                style="font-size: 14px;"
-                ng-style="{color: accountsCtrl.accountSearchFormLayout.editMode ? '' : '#aaa'}"
-                ng-model="accountsCtrl.accountSearchFormLayout.editMode"
-                btn-checkbox></span>
+            <span class="icon-settings pull-right"
+                  style="font-size: 14px;"
+                  ng-style="{color: accountsCtrl.accountSearchFormLayout.editMode ? '' : '#aaa'}"
+                  ng-model="accountsCtrl.accountSearchFormLayout.editMode"
+                  btn-checkbox></span>
           </legend>
           <form-layout
             edit-mode="accountsCtrl.accountSearchFormLayout.editMode"
@@ -38,6 +51,7 @@
           </form-properties>
         </div>
       </div>
+      -->
     </form>
   </div>
 </accounts>

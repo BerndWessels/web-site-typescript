@@ -15,7 +15,7 @@
   function directive(): ng.IDirective {
     return <ng.IDirective> {
       restrict: 'A',
-      scope: true,
+      // scope: true,
       link: link,
       controller: controller,
       template: ''

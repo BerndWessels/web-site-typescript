@@ -1,4 +1,4 @@
-<filtered-option ng-repeat="filteredOption in model.filteredOptions"
-                 ng-class="{'focused': $index === focusedIndex}"
-                 ng-click="selectOption($index)"
-                 tabindex="-1">{{filteredOption}}</filtered-option>
+<filtered-option ng-repeat="filteredOption in filteredOptions"
+                 ng-class="{'focused': $index === focusedIndex, 'selected': filteredOption.selected}"
+                 ng-click="toggleOption($index)"
+                 tabindex="-1">{{filteredOption.label}}</filtered-option>
