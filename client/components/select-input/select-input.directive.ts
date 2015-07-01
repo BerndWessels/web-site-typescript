@@ -30,6 +30,7 @@
       scope: {
         options: '@',
         filter: '=',
+        useExternalFilter: '@',
         multiple: '@',
         listSelected: '@',
         placeholderSource: '@placeholder'
@@ -233,18 +234,21 @@
       var options: any = parseOptionsExpression(instanceAttributes['options'], scope.$parent);
       // update the options.
       function updateOptions(): void {
-        if ((<any>scope).listSelected === 'true') {
-          // map the options expression to the filtered options.
-          (<any>scope).filteredOptions = _.map(options.getOptions().items, (filteredOption: any): any => {
-            // update the selected flag of the filtered option.
-            filteredOption.selected = _.contains(JSON.stringify(controller.$viewValue), JSON.stringify(filteredOption.viewValue));
-            return filteredOption;
-          });
-        } else {
-          (<any>scope).filteredOptions = _.filter(options.getOptions().items, (filteredOption: any): boolean => {
-            return !_.contains(JSON.stringify(controller.$viewValue), JSON.stringify(filteredOption.viewValue));
-          });
-        }
+        // filter the bound options.
+        (<any>scope).filteredOptions = _.filter(options.getOptions().items, (filteredOption: any): boolean => {
+          var result: boolean = true;
+          // if no external filter then filter internally on the label.
+          if ((<any>scope).useExternalFilter !== 'true' && (<any>scope).filter && (<any>scope).filter.length > 0) {
+            result = result && _.contains(filteredOption.label.toLowerCase(), (<any>scope).filter.toLowerCase());
+          }
+          // update the selected flag on the option.
+          filteredOption.selected = _.contains(JSON.stringify(controller.$viewValue), JSON.stringify(filteredOption.viewValue));
+          // remove already selected options if necessary.
+          if ((<any>scope).listSelected !== 'true') {
+            result = result && !filteredOption.selected;
+          }
+          return result;
+        });
       }
 
       // initialize the options.
@@ -253,6 +257,12 @@
       scope.$watch((): any[] => {
         return options.getOptions().items.toString();
       }, (newValue: any, oldValue: any): void => {
+        if (newValue !== oldValue) {
+          updateOptions();
+        }
+      });
+      // we will re-render the option elements if the option values or labels change.
+      scope.$watch('filter', (newValue: any, oldValue: any): void => {
         if (newValue !== oldValue) {
           updateOptions();
         }
