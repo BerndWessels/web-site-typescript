@@ -6,14 +6,37 @@
         <select ng-options="option.name for option in accountsCtrl.options track by option.id" ng-model="accountsCtrl.selectedOptionsX" multiple></select>
         <br/><br/>
         -->
-        <select-input class="form-control input-sm"
+        <label for="singleSelect">Single Select</label>
+        <select-input id="singleSelect" class="form-control input-sm"
+                      ng-model="accountsCtrl.selectedOption"
+                      options="option.name for option in accountsCtrl.options track by option.id"
+                      filter="accountsCtrl.filterA"
+                      placeholder="{{accountsCtrl.placeholder}}">
+        </select-input>
+        <br/>
+        <label for="multiSelect1">Multi Select</label>
+        <select-input id="multiSelect1" class="form-control input-sm"
                       ng-model="accountsCtrl.selectedOptions"
                       options="option.name for option in accountsCtrl.options track by option.id"
-                      filter="accountsCtrl.filter"
-                      list-selected="false">
+                      filter="accountsCtrl.filterB"
+                      multiple="true"
+                      placeholder="{{accountsCtrl.placeholder}}">
         </select-input>
+        <br/>
+        <label for="multiSelect2">Multi Select (list selected options too)</label>
+        <select-input id="multiSelect2" class="form-control input-sm"
+                      ng-model="accountsCtrl.selectedOptions"
+                      options="option.name for option in accountsCtrl.options track by option.id"
+                      filter="accountsCtrl.filterC"
+                      multiple="true"
+                      list-selected="true"
+                      placeholder="{{accountsCtrl.placeholder}}">
+        </select-input>
+        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-        <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+        <ul>
+          <li ng-repeat="option in accountsCtrl.selectedOptions">{{option}}</li>
+        </ul>
         <!--
         <div>O: {{accountsCtrl.options}}</div>
         <div>S: {{accountsCtrl.selectedOptions}}</div>

@@ -30,7 +30,9 @@
       scope: {
         options: '@',
         filter: '=',
-        listSelected: '@'
+        multiple: '@',
+        listSelected: '@',
+        placeholderSource: '@placeholder'
       },
       link: link,
       template: template
@@ -181,7 +183,6 @@
       };
     }
 
-
     /**
      *
      * @param templateElement
@@ -232,16 +233,16 @@
       var options: any = parseOptionsExpression(instanceAttributes['options'], scope.$parent);
       // update the options.
       function updateOptions(): void {
-        if ((<any>scope).listSelected === 'false') {
-          (<any>scope).filteredOptions = _.filter(options.getOptions().items, (filteredOption: any): boolean => {
-            return !_.contains(JSON.stringify(controller.$viewValue), JSON.stringify(filteredOption.viewValue));
-          });
-        } else {
+        if ((<any>scope).listSelected === 'true') {
           // map the options expression to the filtered options.
           (<any>scope).filteredOptions = _.map(options.getOptions().items, (filteredOption: any): any => {
             // update the selected flag of the filtered option.
             filteredOption.selected = _.contains(JSON.stringify(controller.$viewValue), JSON.stringify(filteredOption.viewValue));
             return filteredOption;
+          });
+        } else {
+          (<any>scope).filteredOptions = _.filter(options.getOptions().items, (filteredOption: any): boolean => {
+            return !_.contains(JSON.stringify(controller.$viewValue), JSON.stringify(filteredOption.viewValue));
           });
         }
       }
@@ -258,19 +259,36 @@
       });
       // transform model value to view value.
       controller.$formatters.push((modelValue: any): any => {
-        // extract the selected options and assign them to the view value.
-        var viewValue: any = _.filter((<any>scope).filteredOptions, (filteredOption: any): boolean => {
-          filteredOption.selected = _.contains(JSON.stringify(modelValue), JSON.stringify(filteredOption.viewValue));
-          return filteredOption.selected;
-        });
+        var viewValue: any;
+        // turn model values into view values.
+        if ((<any>scope).multiple === 'true') {
+          // multiple
+          viewValue = _.map(modelValue, (modelOption: any): any => {
+            return _.find(options.getOptions().items, (viewOption: any): boolean => {
+              return JSON.stringify(modelOption) === JSON.stringify(viewOption.viewValue);
+            });
+          });
+        } else {
+          // single
+          viewValue = [_.find(options.getOptions().items, (viewOption: any): boolean => {
+            return JSON.stringify(modelValue) === JSON.stringify(viewOption.viewValue);
+          })];
+        }
         return viewValue;
       });
       // transform view value to model value.
       controller.$parsers.push((viewValue: any): any => {
+        var modelValue: any;
         // this is called after the controller.$viewValue has changed and controller.$commitViewValue() was called.
-        var modelValue: any[] = _.map(viewValue, (filteredOption: any): any => {
-          return filteredOption.viewValue;
-        });
+        if ((<any>scope).multiple === 'true') {
+          // multiple
+          modelValue = _.map(viewValue, (filteredOption: any): any => {
+            return filteredOption.viewValue;
+          });
+        } else {
+          // single
+          modelValue = viewValue.length > 0 ? viewValue[0].viewValue : null;
+        }
         // make sure the bindings are updated.
         controller.$render();
         return modelValue;
@@ -280,6 +298,12 @@
         (<any>scope).selectedOptions = controller.$viewValue;
         updateOptions();
       };
+      // apply the placeholder.
+      scope.$watch((): any => {
+        return (<any>scope).selectedOptions.length;
+      }, (newValue: any, oldValue: any): void => {
+        (<any>scope).placeholder = newValue === 0 ? (<any>scope).placeholderSource : '';
+      });
       // catch the focus on the outer element.
       instanceElement.on('focus', (eventObject: JQueryEventObject): any => {
         if (eventObject.relatedTarget) {
@@ -320,7 +344,7 @@
             parent = parent.parentNode;
           }
           // only close the drop-down if the focus moved out of our control.
-          if ((<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
+          if ((<any>parent) !== instanceElement[0] &&
             (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
             instanceElement.removeClass('focus');
             (<any>scope).focused = false;
@@ -391,21 +415,30 @@
         // select or deselect the option at the given index.
         (<any>scope).filteredOptions[index].selected ? (<any>scope).deselectOption(index, false) : (<any>scope).selectOption(index);
         // update the focus.
-        (<any>scope).focusedIndex = (<any>scope).listSelected === 'false' ? 0 : index;
+        (<any>scope).focusedIndex = (<any>scope).listSelected === 'true' ? index : 0;
       };
       // select the option and the given index.
       (<any>scope).selectOption = (index: number): void => {
-        // clone the viewValue.
-        var newViewValue: any[] = _.map(controller.$viewValue, (item: any): any => {
-          return item;
-        });
-        // set the new options selected flag.
-        var selectedOption: any = (<any>scope).filteredOptions[index];
-        selectedOption.selected = true;
-        // add the option to the selected options.
-        newViewValue.push(selectedOption);
-        // set the new view value.
-        controller.$setViewValue(newViewValue);
+        // multiple selection.
+        if ((<any>scope).multiple === 'true') {
+          // clone the viewValue.
+          var newViewValue: any[] = _.map(controller.$viewValue, (item: any): any => {
+            return item;
+          });
+          // set the new options selected flag.
+          var selectedOption: any = (<any>scope).filteredOptions[index];
+          selectedOption.selected = true;
+          // add the option to the selected options.
+          newViewValue.push(selectedOption);
+          // set the new view value.
+          controller.$setViewValue(newViewValue);
+        } else {
+          // set the new options selected flag.
+          var singleSelectedOption: any = (<any>scope).filteredOptions[index];
+          singleSelectedOption.selected = true;
+          // set the new view value.
+          controller.$setViewValue([singleSelectedOption]);
+        }
         // update the filtered options.
         updateOptions();
         // focus the input element.
