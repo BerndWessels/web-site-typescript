@@ -40,6 +40,11 @@ select-input-compiled > input {
   min-width: 200px;
 }
 
+select-input-compiled > input::placeholder {
+  color: @input-color-placeholder;
+  font-style: italic;
+}
+
 select-input-filtered-options > filtered-option {
   display: block;
   padding: 4px;

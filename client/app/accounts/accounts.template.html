@@ -11,7 +11,8 @@
                       ng-model="accountsCtrl.selectedOption"
                       options="option.name for option in accountsCtrl.options track by option.id"
                       filter="accountsCtrl.filterA"
-                      placeholder="{{accountsCtrl.placeholder}}">
+                      placeholder="{{accountsCtrl.placeholder}}"
+                      always-allow-placeholder="true">
         </select-input>
         <br/>
         <label for="multiSelect1">Multi Select</label>
@@ -20,7 +21,8 @@
                       options="option.name for option in accountsCtrl.options track by option.id"
                       filter="accountsCtrl.filterB"
                       multiple="true"
-                      placeholder="{{accountsCtrl.placeholder}}">
+                      placeholder="{{accountsCtrl.placeholder}}"
+                      always-allow-placeholder="true">
         </select-input>
         <br/>
         <label for="multiSelect2">Multi Select (list selected options too)</label>

@@ -33,7 +33,8 @@
         useExternalFilter: '@',
         multiple: '@',
         listSelected: '@',
-        placeholderSource: '@placeholder'
+        placeholderSource: '@placeholder',
+        alwaysAllowPlaceholder: '@'
       },
       link: link,
       template: template
@@ -200,7 +201,7 @@
       return '<select-input-compiled root-popup-target>' +
         $templateCache.get(selectedOptionsTemplate) +
         $templateCache.get('select-input-input') +
-        '<root-popup tabindex="-1" ng-if="focused">' +
+        '<root-popup tabindex="-1" ng-if="open">' +
         '<select-input-filtered-options>' +
         $templateCache.get(filteredOptionsTemplate) +
         '</select-input-filtered-options>' +
@@ -249,6 +250,8 @@
           }
           return result;
         });
+        // reset the focused index.
+        (<any>scope).focusedIndex = 0;
       }
 
       // initialize the options.
@@ -310,9 +313,9 @@
       };
       // apply the placeholder.
       scope.$watch((): any => {
-        return (<any>scope).selectedOptions.length;
+        return (<any>scope).alwaysAllowPlaceholder === 'true' && (<any>scope).open ? true : (<any>scope).selectedOptions.length === 0;
       }, (newValue: any, oldValue: any): void => {
-        (<any>scope).placeholder = newValue === 0 ? (<any>scope).placeholderSource : '';
+        (<any>scope).placeholder = newValue ? (<any>scope).placeholderSource : '';
       });
       // catch the focus on the outer element.
       instanceElement.on('focus', (eventObject: JQueryEventObject): any => {
@@ -334,13 +337,13 @@
       // catch the focus on the outer element.
       instanceElement.on('blur', (eventObject: JQueryEventObject): any => {
         instanceElement.removeClass('focus');
-        (<any>scope).focused = false;
+        (<any>scope).open = false;
         (<any>scope).filter = '';
         scope.$apply();
       });
       // setting the focus will open the drop-down.
       (<any>scope).onFocus = (eventObject: JQueryEventObject): any => {
-        (<any>scope).focused = true;
+        (<any>scope).open = true;
         instanceElement.addClass('focus');
       };
       // resetting the focus will close the drop-down.
@@ -357,15 +360,14 @@
           if ((<any>parent) !== instanceElement[0] &&
             (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
             instanceElement.removeClass('focus');
-            (<any>scope).focused = false;
+            (<any>scope).open = false;
             (<any>scope).filter = '';
           }
         } else {
           instanceElement.removeClass('focus');
-          (<any>scope).focused = false;
+          (<any>scope).open = false;
           (<any>scope).filter = '';
         }
-
       };
       // this is the index of the focused option in the drop-down.
       (<any>scope).focusedIndex = 0;
@@ -374,8 +376,17 @@
         if (!eventObject) {
           return;
         }
+        // escape closes the popup.
+        if (eventObject.keyCode === 27) {
+          if ((<any>scope).open) {
+            (<any>scope).open = false;
+            (<any>scope).filter = '';
+          }
+        } else {
+          // any other key opens it.
+          (<any>scope).open = true;
+        }
         // the event came from the input control.
-
         switch (eventObject.keyCode) {
           case 40:
             // move the focus down.
@@ -451,6 +462,10 @@
         }
         // update the filtered options.
         updateOptions();
+        // reset the filter if necessary.
+        if ((<any>scope).listSelected !== 'true') {
+          (<any>scope).filter = '';
+        }
         // focus the input element.
         instanceElement.find('input').focus();
       };
