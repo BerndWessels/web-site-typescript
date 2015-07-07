@@ -18,7 +18,9 @@ module app.accounts {
     selectedOptions: any;
     options: any;
     filter: string;
+    filterB: string;
     placeholder: string;
+    addNewOption(): void;
   }
   /**
    * This is the controller for the accounts feature controller.
@@ -41,7 +43,9 @@ module app.accounts {
     selectedOptions: any;
     options: any;
     filter: string;
+    filterB: string;
     placeholder: string;
+    addNewOption: () => void;
 
     /**
      * This is the constructor that takes the injected dependencies.
@@ -65,7 +69,9 @@ module app.accounts {
       vm.options = dbOptions;
       vm.filter = '';
       vm.placeholder = 'Username';
-
+      vm.addNewOption = ((): void => {
+        alert(vm.filterB);
+      }).bind(this);
 
       $scope.$watch((): any => {
           return vm.filter;

@@ -12,14 +12,14 @@
    * This is the dependency injection for the class constructor.
    * @type {string[]} Dependencies to be injected.
    */
-  directive.$inject = ['$templateCache', '$parse'];
+  directive.$inject = ['$templateCache', '$parse', '$timeout'];
   /**
    * This is the directive constructor that takes the injected dependencies.
    * @param $templateCache Injected window service dependency.
    * @param $parse Injected parse service dependency.
    * @returns {ng.IDirective}
    */
-  function directive($templateCache: ng.ITemplateCacheService, $parse: ng.IParseService): ng.IDirective {
+  function directive($templateCache: ng.ITemplateCacheService, $parse: ng.IParseService, $timeout: ng.ITimeoutService): ng.IDirective {
 
     var hashKey: number = 9999;
 
@@ -34,7 +34,8 @@
         multiple: '@',
         listSelected: '@',
         placeholderSource: '@placeholder',
-        alwaysAllowPlaceholder: '@'
+        alwaysAllowPlaceholder: '@',
+        addNewOption: '='
       },
       link: link,
       template: template
@@ -196,7 +197,7 @@
         templateAttributes['selectedOptionsTemplate'] : 'select-input-selected-options';
       // the filtered options are in the dropdown below the control.
       var filteredOptionsTemplate: string = templateAttributes.hasOwnProperty('filteredOptionsTemplate') ?
-        templateAttributes['filteredOptionsTemplate'] : 'select-input-filtered-options-only';
+        templateAttributes['filteredOptionsTemplate'] : 'select-input-filtered-options' + (templateAttributes.hasOwnProperty('addNewOption') ? '' : '-only');
       // the input is after the selected options.
       return '<select-input-compiled root-popup-target>' +
         $templateCache.get(selectedOptionsTemplate) +
@@ -317,57 +318,71 @@
       }, (newValue: any, oldValue: any): void => {
         (<any>scope).placeholder = newValue ? (<any>scope).placeholderSource : '';
       });
-      // catch the focus on the outer element.
-      instanceElement.on('focus', (eventObject: JQueryEventObject): any => {
-        if (eventObject.relatedTarget) {
-          // find the origin of the element that lost the focus.
-          var parent: Node = eventObject.relatedTarget.parentNode;
-          while ((<any>parent).tagName.toLowerCase() !== 'body' &&
-          (<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
-          (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
-            parent = parent.parentNode;
-          }
-          // focus the input element when we tabbed into the outer element.
-          if ((<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
-            (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
-            instanceElement.find('input').focus();
-          }
-        }
-      });
-      // catch the focus on the outer element.
-      instanceElement.on('blur', (eventObject: JQueryEventObject): any => {
-        instanceElement.removeClass('focus');
-        (<any>scope).open = false;
-        (<any>scope).filter = '';
-        scope.$apply();
-      });
+      /*
+       // catch the focus on the outer element.
+       instanceElement.on('focus', (eventObject: JQueryEventObject): any => {
+       alert('bernd');
+       if (eventObject.relatedTarget) {
+       // find the origin of the element that lost the focus.
+       var parent: Node = eventObject.relatedTarget.parentNode;
+       while ((<any>parent).tagName.toLowerCase() !== 'body' &&
+       (<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
+       (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
+       parent = parent.parentNode;
+       }
+       // focus the input element when we tabbed into the outer element.
+       if ((<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
+       (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
+       instanceElement.find('input').focus();
+       }
+       }
+       });
+       // catch the focus on the outer element.
+       instanceElement.on('blur', (eventObject: JQueryEventObject): any => {
+       alert('bernd');
+       instanceElement.removeClass('focus');
+       (<any>scope).open = false;
+       (<any>scope).filter = '';
+       scope.$apply();
+       });
+       */
       // setting the focus will open the drop-down.
       (<any>scope).onFocus = (eventObject: JQueryEventObject): any => {
-        (<any>scope).open = true;
-        instanceElement.addClass('focus');
+        $timeout((): void => {
+          (<any>scope).open = true;
+          instanceElement.addClass('focus');
+        });
       };
       // resetting the focus will close the drop-down.
       (<any>scope).onBlur = (eventObject: JQueryEventObject): any => {
-        if (eventObject.relatedTarget) {
-          // find the origin of the element that receives the focus.
-          var parent: Node = eventObject.relatedTarget.parentNode;
-          while ((<any>parent).tagName.toLowerCase() !== 'body' &&
-          (<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
-          (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
-            parent = parent.parentNode;
-          }
-          // only close the drop-down if the focus moved out of our control.
-          if ((<any>parent) !== instanceElement[0] &&
+        $timeout((): void => {
+          var relatedTarget: Element = document.activeElement;
+          if (relatedTarget) {
+            // find the origin of the element that receives the focus.
+            var parent: Node = relatedTarget.parentNode;
+            while ((<any>parent).tagName &&
+            (<any>parent).tagName.toLowerCase() !== 'body' &&
+            (<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
             (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
+              parent = parent.parentNode;
+            }
+            // only close the drop-down if the focus moved out of our control.
+            if ((<any>parent) !== instanceElement[0] &&
+              (
+                !(<any>parent).tagName ||
+                (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options'
+              )
+            ) {
+              instanceElement.removeClass('focus');
+              (<any>scope).open = false;
+              (<any>scope).filter = '';
+            }
+          } else {
             instanceElement.removeClass('focus');
             (<any>scope).open = false;
             (<any>scope).filter = '';
           }
-        } else {
-          instanceElement.removeClass('focus');
-          (<any>scope).open = false;
-          (<any>scope).filter = '';
-        }
+        });
       };
       // this is the index of the focused option in the drop-down.
       (<any>scope).focusedIndex = 0;
@@ -386,12 +401,14 @@
           // any other key opens it.
           (<any>scope).open = true;
         }
-        // the event came from the input control.
+        // add-new-option mode.
+        var addNewOptionAdjustment: number = (<any>scope).addNewOption ? 1 : 0;
+        // handle common key events.
         switch (eventObject.keyCode) {
           case 40:
             // move the focus down.
             /* jshint expr: true */
-            (<any>scope).focusedIndex < (<any>scope).filteredOptions.length - 1 ? (<any>scope).focusedIndex++ : angular.noop();
+            (<any>scope).focusedIndex < (<any>scope).filteredOptions.length - 1 + addNewOptionAdjustment ? (<any>scope).focusedIndex++ : angular.noop();
             eventObject.preventDefault();
             break;
           case 38:
@@ -403,7 +420,11 @@
           case 13:
             // select the focused option.
             /* jshint expr: true */
-            (<any>scope).filteredOptions.length > (<any>scope).focusedIndex ? (<any>scope).toggleOption((<any>scope).focusedIndex) : angular.noop();
+            if ((<any>scope).addNewOption && (<any>scope).focusedIndex === 0) {
+              (<any>scope).addNewOption();
+            } else {
+              (<any>scope).filteredOptions.length > (<any>scope).focusedIndex - addNewOptionAdjustment ? (<any>scope).toggleOption((<any>scope).focusedIndex - addNewOptionAdjustment) : angular.noop();
+            }
             break;
         }
         if (index !== undefined) {

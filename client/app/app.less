@@ -8,6 +8,19 @@
 @import '../assets/fonts/roboto/style.less';
 @roboto-font-path: '/assets/fonts/roboto';
 
+// Bootstrap checkbox. https://github.com/flatlogic/awesome-bootstrap-checkbox
+@fa-var-check: '\e8a6';
+@import '../bower_components/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.less';
+@font-family-icon: 'icomoon';
+.checkbox {
+  input[type="checkbox"] {
+    &:checked + label::after {
+      font-weight: bolder;
+    }
+  }
+}
+
+
 // Hide angular binding syntax.
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;

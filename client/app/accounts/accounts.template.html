@@ -2,38 +2,59 @@
   <div class="container">
     <form>
       <div class="row">
+        <div class="col-sm-4">
+          <div class="checkbox checkbox-danger">
+            <input type="checkbox" id="checkbox1">
+            <label for="checkbox1">
+              Check me out
+            </label>
+          </div>
+        </div>
+        <div class="col-sm-4">
+          <div class="checkbox checkbox-danger checkbox-single">
+            <input type="checkbox" id="checkbox2">
+            <label for="checkbox2"></label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
         <!--
         <select ng-options="option.name for option in accountsCtrl.options track by option.id" ng-model="accountsCtrl.selectedOptionsX" multiple></select>
         <br/><br/>
         -->
-        <label for="singleSelect">Single Select</label>
-        <select-input id="singleSelect" class="form-control input-sm"
-                      ng-model="accountsCtrl.selectedOption"
-                      options="option.name for option in accountsCtrl.options track by option.id"
-                      filter="accountsCtrl.filterA"
-                      placeholder="{{accountsCtrl.placeholder}}"
-                      always-allow-placeholder="true">
-        </select-input>
-        <br/>
-        <label for="multiSelect1">Multi Select</label>
-        <select-input id="multiSelect1" class="form-control input-sm"
-                      ng-model="accountsCtrl.selectedOptions"
-                      options="option.name for option in accountsCtrl.options track by option.id"
-                      filter="accountsCtrl.filterB"
-                      multiple="true"
-                      placeholder="{{accountsCtrl.placeholder}}"
-                      always-allow-placeholder="true">
-        </select-input>
-        <br/>
-        <label for="multiSelect2">Multi Select (list selected options too)</label>
-        <select-input id="multiSelect2" class="form-control input-sm"
-                      ng-model="accountsCtrl.selectedOptions"
-                      options="option.name for option in accountsCtrl.options track by option.id"
-                      filter="accountsCtrl.filterC"
-                      multiple="true"
-                      list-selected="true"
-                      placeholder="{{accountsCtrl.placeholder}}">
-        </select-input>
+        <div class="col-sm-4">
+          <label for="singleSelect">Single Select</label>
+          <select-input id="singleSelect" class="form-control input-sm"
+                        ng-model="accountsCtrl.selectedOption"
+                        options="option.name for option in accountsCtrl.options track by option.id"
+                        filter="accountsCtrl.filterA"
+                        placeholder="{{accountsCtrl.placeholder}}"
+                        always-allow-placeholder="true">
+          </select-input>
+        </div>
+        <div class="col-sm-4">
+          <label for="multiSelect1">Multi Select</label>
+          <select-input id="multiSelect1" class="form-control input-sm"
+                        ng-model="accountsCtrl.selectedOptions"
+                        options="option.name for option in accountsCtrl.options track by option.id"
+                        filter="accountsCtrl.filterB"
+                        multiple="true"
+                        placeholder="{{accountsCtrl.placeholder}}"
+                        always-allow-placeholder="true"
+                        add-new-option="accountsCtrl.addNewOption">
+          </select-input>
+        </div>
+        <div class="col-sm-4">
+          <label for="multiSelect2">Multi Select (list selected options too)</label>
+          <select-input id="multiSelect2" class="form-control input-sm"
+                        ng-model="accountsCtrl.selectedOptions"
+                        options="option.name for option in accountsCtrl.options track by option.id"
+                        filter="accountsCtrl.filterC"
+                        multiple="true"
+                        list-selected="true"
+                        placeholder="{{accountsCtrl.placeholder}}">
+          </select-input>
+        </div>
         <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
         <ul>

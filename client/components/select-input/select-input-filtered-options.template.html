@@ -1,6 +1,8 @@
-<filtered-option ng-class="{'focused': focusedIndex === 0}">{{filter}}
-  <div ng-repeat="filteredOption in filteredOptions"
-       ng-class="{'focused': $index + 1 === focusedIndex}"
-       ng-click="toggleOption($index + 1)"
-       tabindex="-1">{{filteredOption}}</div>
-</filtered-option>
+<filtered-option ng-if="filter.length > 0"
+                 ng-class="{'focused': focusedIndex === 0, 'selected': filteredOption.selected}"
+                 ng-click="addNewOption()"
+                 tabindex="-1">{{filter}}</filtered-option>
+<filtered-option ng-repeat="filteredOption in filteredOptions"
+                 ng-class="{'focused': $index + 1 === focusedIndex, 'selected': filteredOption.selected}"
+                 ng-click="toggleOption($index)"
+                 tabindex="-1">{{filteredOption.label}}</filtered-option>
