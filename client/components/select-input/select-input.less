@@ -12,7 +12,11 @@ select-input-compiled {
   position: relative !important;
   height: auto !important;
   display: flex !important;
-  flex-wrap: wrap !important;
+  flex-wrap: wrap;
+}
+
+select-input-compiled.nowrap {
+  flex-wrap: nowrap !important;
 }
 
 select-input-compiled > textarea, input { outline: none; }
@@ -61,4 +65,35 @@ select-input-filtered-options > filtered-option.selected {
 
 select-input-filtered-options > filtered-option:hover {
   background-color: #d3defb;
+}
+
+
+
+.arrow_box {
+  position: relative;
+  background: #88b7d5;
+  border: 2px solid #c2e1f5;
+}
+.arrow_box:after, .arrow_box:before {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.arrow_box:after {
+  border-color: rgba(136, 183, 213, 0);
+  border-bottom-color: #88b7d5;
+  border-width: 30px;
+  margin-left: -30px;
+}
+.arrow_box:before {
+  border-color: rgba(194, 225, 245, 0);
+  border-bottom-color: #c2e1f5;
+  border-width: 33px;
+  margin-left: -33px;
 }

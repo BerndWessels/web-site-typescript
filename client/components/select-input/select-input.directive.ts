@@ -199,7 +199,7 @@
       var filteredOptionsTemplate: string = templateAttributes.hasOwnProperty('filteredOptionsTemplate') ?
         templateAttributes['filteredOptionsTemplate'] : 'select-input-filtered-options' + (templateAttributes.hasOwnProperty('addNewOption') ? '' : '-only');
       // the input is after the selected options.
-      return '<select-input-compiled root-popup-target>' +
+      return '<select-input-compiled root-popup-target ng-click="click($event);">' +
         $templateCache.get(selectedOptionsTemplate) +
         $templateCache.get('select-input-input') +
         '<root-popup tabindex="-1" ng-if="open">' +
@@ -450,6 +450,12 @@
               eventObject.stopPropagation();
               break;
           }
+        }
+      };
+      // focus the input when the element is clicked.
+      (<any>scope).click = (eventObject: JQueryEventObject): void => {
+        if (eventObject.target === instanceElement[0]) {
+          instanceElement.find('input').focus();
         }
       };
       // toggle the selected status of the option and the given index.
