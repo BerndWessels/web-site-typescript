@@ -51,6 +51,15 @@ module.exports = function (grunt) {
     'env:prod', 'express:prod', 'wait', 'open', 'express-keepalive'
   ]);
 
+  // Serve production build.
+  grunt.registerTask('build-prod', [
+    'clean:default', 'clean:dist',
+    'injector:less', 'less', 'autoprefixer',
+    'tsd', 'html2ts', 'tslint', 'typescript', 'tso',
+    'wiredep',
+    'useminPrepare', 'concat', 'copy:dist', 'cssmin', 'uglify', 'rev', 'usemin'
+  ]);
+
   // Project configuration.
   grunt.initConfig({
 

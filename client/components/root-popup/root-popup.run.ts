@@ -16,6 +16,7 @@
   function run($templateCache: ng.ITemplateCacheService): void {
     $templateCache.put('select-input-input', components.selectInput.selectInputTemplate);
     $templateCache.put('select-input-selected-options', components.selectInput.selectInputSelectedOptionsTemplate);
+    $templateCache.put('select-input-selected-options-popup', components.selectInput.selectInputSelectedOptionsPopupTemplate);
     $templateCache.put('select-input-filtered-options', components.selectInput.selectInputFilteredOptionsTemplate);
     $templateCache.put('select-input-filtered-options-only', components.selectInput.selectInputFilteredOptionsOnlyTemplate);
   }

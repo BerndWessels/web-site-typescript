@@ -1,0 +1,5 @@
+<selected-option ng-repeat="selectedOption in selectedOptions"
+                 tabindex="0"
+                 ng-keydown="onKeyDownLimited($event, $index)"
+                 ng-focus="onFocusLimited($event)"
+                 ng-blur="onBlurLimited($event)">{{selectedOption.label}}</selected-option>

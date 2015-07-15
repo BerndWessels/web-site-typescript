@@ -35,7 +35,9 @@
         listSelected: '@',
         placeholderSource: '@placeholder',
         alwaysAllowPlaceholder: '@',
-        addNewOption: '='
+        addNewOption: '=',
+        selectedOptionsLimit: '@',
+        selectedOptionsLimitText: '@'
       },
       link: link,
       template: template
@@ -195,6 +197,9 @@
       // the selected options are the first in the control.
       var selectedOptionsTemplate: string = templateAttributes.hasOwnProperty('selectedOptionsTemplate') ?
         templateAttributes['selectedOptionsTemplate'] : 'select-input-selected-options';
+      // there are also selected options in a popup if the count is limited.
+      var selectedOptionsPopupTemplate: string = templateAttributes.hasOwnProperty('selectedOptionsPopupTemplate') ?
+        templateAttributes['selectedOptionsPopupTemplate'] : 'select-input-selected-options-popup';
       // the filtered options are in the dropdown below the control.
       var filteredOptionsTemplate: string = templateAttributes.hasOwnProperty('filteredOptionsTemplate') ?
         templateAttributes['filteredOptionsTemplate'] : 'select-input-filtered-options' + (templateAttributes.hasOwnProperty('addNewOption') ? '' : '-only');
@@ -202,7 +207,12 @@
       return '<select-input-compiled root-popup-target ng-click="click($event);">' +
         $templateCache.get(selectedOptionsTemplate) +
         $templateCache.get('select-input-input') +
-        '<root-popup tabindex="-1" ng-if="open">' +
+        '<root-popup top arrow align tabindex="-1" ng-if="openLimited" id="{{limitedPopupId}}">' +
+        '<select-input-selected-options>' +
+        $templateCache.get(selectedOptionsPopupTemplate) +
+        '</select-input-selected-options>' +
+        '</root-popup>' +
+        '<root-popup align tabindex="-1" ng-if="open">' +
         '<select-input-filtered-options>' +
         $templateCache.get(filteredOptionsTemplate) +
         '</select-input-filtered-options>' +
@@ -229,9 +239,21 @@
         instanceElement.removeAttr('id');
         instanceElement.find('input').attr('id', id);
       }
+      // create internal ids.
+      (<any>scope).limitedPopupId = 'select-input-' + new Date().getTime();
       // setup the options for binding.
       (<any>scope).filteredOptions = [];
       (<any>scope).selectedOptions = [];
+      // initialize optional bindings.
+      if (!scope.hasOwnProperty('selectedOptionsLimit')) {
+        (<any>scope).selectedOptionsLimit = 9999;
+      }
+      if (!scope.hasOwnProperty('selectedOptionsLimitText')) {
+        (<any>scope).selectedOptionsLimitText = 'selected';
+      }
+      // initialize internal bindings.
+      (<any>scope).open = false;
+      (<any>scope).openLimited = false;
       // parse the options expression.
       var options: any = parseOptionsExpression(instanceAttributes['options'], scope.$parent);
       // update the options.
@@ -318,38 +340,120 @@
       }, (newValue: any, oldValue: any): void => {
         (<any>scope).placeholder = newValue ? (<any>scope).placeholderSource : '';
       });
-      /*
-       // catch the focus on the outer element.
-       instanceElement.on('focus', (eventObject: JQueryEventObject): any => {
-       alert('bernd');
-       if (eventObject.relatedTarget) {
-       // find the origin of the element that lost the focus.
-       var parent: Node = eventObject.relatedTarget.parentNode;
-       while ((<any>parent).tagName.toLowerCase() !== 'body' &&
-       (<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
-       (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
-       parent = parent.parentNode;
-       }
-       // focus the input element when we tabbed into the outer element.
-       if ((<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
-       (<any>parent).tagName.toLowerCase() !== 'select-input-filtered-options') {
-       instanceElement.find('input').focus();
-       }
-       }
-       });
-       // catch the focus on the outer element.
-       instanceElement.on('blur', (eventObject: JQueryEventObject): any => {
-       alert('bernd');
-       instanceElement.removeClass('focus');
-       (<any>scope).open = false;
-       (<any>scope).filter = '';
-       scope.$apply();
-       });
-       */
+      // limited.
+      (<any>scope).onFocusLimited = (eventObject: JQueryEventObject): any => {
+        $timeout((): void => {
+          (<any>scope).open = false;
+          (<any>scope).openLimited = true;
+          instanceElement.addClass('focus');
+        });
+      };
+      // limit.
+      (<any>scope).onFocusLimit = (eventObject: JQueryEventObject): any => {
+        $timeout((): void => {
+          (<any>scope).open = false;
+          (<any>scope).openLimited = true;
+          instanceElement.addClass('focus');
+        });
+      };
+      // limit.
+      (<any>scope).onKeyDownLimit = (eventObject: JQueryEventObject): any => {
+        if (!eventObject) {
+          return;
+        }
+        // escape closes the popup.
+        if (eventObject.keyCode === 9 && eventObject.shiftKey === false) {
+          var selector: string = '#' + (<any>scope).limitedPopupId + ' selected-option';
+          angular.element(document.querySelector(selector)).focus();
+          eventObject.preventDefault();
+          eventObject.stopPropagation();
+        }
+      };
+      // limit.
+      (<any>scope).onFocusLimited = (eventObject: JQueryEventObject): any => {
+        $timeout((): void => {
+          console.log();
+        });
+      };
+      // limit.
+      (<any>scope).onBlurLimited = (eventObject: JQueryEventObject): any => {
+        $timeout((): void => {
+          var relatedTarget: Element = document.activeElement;
+          if (relatedTarget) {
+            // find the origin of the element that receives the focus.
+            var parent: Node = relatedTarget.parentNode;
+            while ((<any>parent).tagName &&
+            (<any>parent).tagName.toLowerCase() !== 'body' &&
+            (<any>parent).tagName.toLowerCase() !== 'select-input-compiled' &&
+            (<any>parent).tagName.toLowerCase() !== 'select-input-selected-options') {
+              parent = parent.parentNode;
+            }
+            // only close the drop-down if the focus moved out of our control.
+            if ((<any>parent) !== instanceElement[0] &&
+              (
+                !(<any>parent).tagName ||
+                (<any>parent).tagName.toLowerCase() !== 'select-input-selected-options'
+              )
+            ) {
+              instanceElement.removeClass('focus');
+              (<any>scope).openLimited = false;
+              (<any>scope).filter = '';
+            }
+          } else {
+            instanceElement.removeClass('focus');
+            (<any>scope).openLimited = false;
+            (<any>scope).filter = '';
+          }
+        });
+      };
+      // limit.
+      (<any>scope).onKeyDownLimited = (eventObject: JQueryEventObject, index: number): any => {
+        if (!eventObject) {
+          return;
+        }
+        // allow tab to the next element.
+        if (eventObject.keyCode === 9) {
+          // select the next element.
+          if (angular.element(eventObject.target).next()[0]) {
+            return;
+          }
+          // redirect tab from the last element to the input.
+          instanceElement.find('input').focus();
+          eventObject.preventDefault();
+          eventObject.stopPropagation();
+          return;
+        }
+        // the event came from a selected option.
+        switch (eventObject.keyCode) {
+          // escape closes the popup.
+          case 27:
+            (<any>scope).openLimited = false;
+            instanceElement.find('input').focus();
+            break;
+          case 46:
+          case 8:
+            // remove the selected option.
+            (<any>scope).deselectOption(index, true);
+            // select the previous element.
+            if (angular.element(eventObject.target).prev()[0]) {
+              angular.element(eventObject.target).prev()[0].focus();
+            } else if (angular.element(eventObject.target).next()[0]) {
+              angular.element(eventObject.target).next()[0].focus();
+            } else {
+              // focus the input element.
+              instanceElement.find('input').focus();
+            }
+            // prevent navigation.
+            eventObject.preventDefault();
+            eventObject.stopPropagation();
+            break;
+        }
+      };
       // setting the focus will open the drop-down.
       (<any>scope).onFocus = (eventObject: JQueryEventObject): any => {
         $timeout((): void => {
           (<any>scope).open = true;
+          (<any>scope).openLimited = false;
           instanceElement.addClass('focus');
         });
       };
@@ -375,11 +479,13 @@
             ) {
               instanceElement.removeClass('focus');
               (<any>scope).open = false;
+              (<any>scope).openLimited = false;
               (<any>scope).filter = '';
             }
           } else {
             instanceElement.removeClass('focus');
             (<any>scope).open = false;
+            (<any>scope).openLimited = false;
             (<any>scope).filter = '';
           }
         });
@@ -395,11 +501,13 @@
         if (eventObject.keyCode === 27) {
           if ((<any>scope).open) {
             (<any>scope).open = false;
+            (<any>scope).openLimited = false;
             (<any>scope).filter = '';
           }
         } else {
           // any other key opens it.
           (<any>scope).open = true;
+          (<any>scope).openLimited = false;
         }
         // add-new-option mode.
         var addNewOptionAdjustment: number = (<any>scope).addNewOption ? 1 : 0;
@@ -511,11 +619,14 @@
         // update the filtered options.
         updateOptions();
         // focus the input element.
-        instanceElement.find('input').focus();
+        if (!fromSelected) {
+          instanceElement.find('input').focus();
+        }
       };
     }
   }
 
   // register the directive.
   angular.module('selectInput').directive('selectInput', directive);
-})();
+})
+();

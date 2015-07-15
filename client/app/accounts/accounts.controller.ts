@@ -58,14 +58,19 @@ module app.accounts {
       var vm: IAccountsController = <any>this;
 
       var dbOptions: any[] = [
-        {id: 10, name: 'Bernd', email: 'b@w.de'},
-        {id: 11, name: 'Bent', email: 'b@w.de'},
-        {id: 12, name: 'Werber', email: 'b@w.com'},
-        {id: 13, name: 'Wessels', email: 'b@w.com'}
+        {id: 1, name: 'Option One', email: 'one@option.com'},
+        {id: 2, name: 'Option Two', email: 'two@option.com'},
+        {id: 3, name: 'Option Three', email: 'three@option.com'},
+        {id: 4, name: 'Option Four', email: 'four@option.com'},
+        {id: 5, name: 'Option Five', email: 'five@option.com'}
       ];
 
-      vm.selectedOption = {id: 11, name: 'Bent', email: 'b@w.de'};
-      vm.selectedOptions = [{id: 11, name: 'Bent', email: 'b@w.de'}, {id: 12, name: 'Werber', email: 'b@w.com'}];
+      vm.selectedOption = {id: 3, name: 'Option Three', email: 'three@option.com'};
+      vm.selectedOptions = [
+        {id: 5, name: 'Option Five', email: 'five@option.com'},
+        {id: 1, name: 'Option One', email: 'one@option.com'},
+        {id: 3, name: 'Option Three', email: 'three@option.com'}
+      ];
       vm.options = dbOptions;
       vm.filter = '';
       vm.placeholder = 'Username';
@@ -96,7 +101,11 @@ module app.accounts {
       vm.optionsModel = {
         // required properties.
         filteredOptions: [],
-        selectedOptions: [{id: 11, name: 'Bent', email: 'b@w.de'}, {id: 12, name: 'Werber', email: 'b@w.com'}],
+        selectedOptions: [
+          {name: 'Option One', email: 'one@option.com'},
+          {name: 'Option Three', email: 'three@option.com'},
+          {name: 'Option Five', email: 'five@option.com'}
+        ],
         filter: '',
         // customization.
         options: [],
@@ -107,10 +116,11 @@ module app.accounts {
           }
           vm.optionsModel.timeout = $timeout(_.bind((): void => {
             vm.optionsModel.options = [
-              {name: 'Bernd', email: 'b@w.de'},
-              {name: 'Bent', email: 'b@w.de'},
-              {name: 'Werber', email: 'b@w.de'},
-              {name: 'Wessels', email: 'b@w.de'}
+              {name: 'Option One', email: 'one@option.com'},
+              {name: 'Option Two', email: 'two@option.com'},
+              {name: 'Option Three', email: 'three@option.com'},
+              {name: 'Option Four', email: 'four@option.com'},
+              {name: 'Option Five', email: 'five@option.com'}
             ];
             vm.optionsModel.filterOptions();
           }, this), 1000);

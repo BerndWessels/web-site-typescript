@@ -1,5 +1,11 @@
-<selected-option ng-repeat="selectedOption in selectedOptions"
+<selected-option ng-if="selectedOptions.length < selectedOptionsLimit"
+                 ng-repeat="selectedOption in selectedOptions"
                  tabindex="0"
                  ng-keydown="onKeyDown($event, $index)"
                  ng-focus="onFocus($event)"
                  ng-blur="onBlur($event)">{{selectedOption.label}}</selected-option>
+<selected-option ng-if="selectedOptions.length >= selectedOptionsLimit"
+                 tabindex="0"
+                 ng-keydown="onKeyDownLimit($event)"
+                 ng-focus="onFocusLimit($event)"
+                 ng-blur="onBlurLimited($event)">{{selectedOptions.length}}&nbsp;{{selectedOptionsLimitText}}</selected-option>
