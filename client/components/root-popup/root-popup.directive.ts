@@ -17,7 +17,9 @@
       replace: true,
       restrict: 'E',
       require: '^rootPopupTarget',
-      scope: true,
+      scope: {
+        open: '='
+      },
       link: link,
       template: '<root-popup-compiled ng-transclude></root-popup-compiled>',
       transclude: true
@@ -37,10 +39,6 @@
                   transclude: ng.ITranscludeFunction): void {
       // remember the original parent.
       var parent: JQuery = instanceElement.parent();
-      // detach the popup element from its current parent.
-      instanceElement.detach();
-      // attach it to the document body.
-      instanceElement.appendTo('body');
       var top: boolean = instanceAttributes.hasOwnProperty('top');
       var bottom: boolean = instanceAttributes.hasOwnProperty('bottom');
       var left: boolean = instanceAttributes.hasOwnProperty('left');
@@ -100,7 +98,6 @@
             // update the link element's position.
             if (top) {
               instanceElement.css({
-                display: 'block',
                 top: targetOffset.top - instanceHeight,
                 left: targetOffset.left,
                 width: align ? targetWidth : ''
@@ -108,7 +105,6 @@
             }
             if (bottom) {
               instanceElement.css({
-                display: 'block',
                 top: targetOffset.top + targetHeight,
                 left: targetOffset.left,
                 width: align ? targetWidth : ''
@@ -116,7 +112,6 @@
             }
             if (left) {
               instanceElement.css({
-                display: 'block',
                 top: (
                   targetOffset.top +
                   Math.floor(targetHeight / 2) -
@@ -127,7 +122,6 @@
             }
             if (right) {
               instanceElement.css({
-                display: 'block',
                 top: (
                   targetOffset.top +
                   Math.floor(targetHeight / 2) -
@@ -149,8 +143,29 @@
         }
       }
 
-      // monitor and update the popup positions and dimensions.
-      interval = setInterval(update, 1);
+      // monitor visiblility.
+      scope.$watch('open', (newValue: any, oldValue: any): any => {
+        if (newValue === true) {
+          // detach the popup element from its current parent.
+          instanceElement.detach();
+          // attach it to the document body.
+          instanceElement.appendTo('body');
+          // show it.
+          instanceElement.css({display: 'block'});
+          // monitor and update the popup positions and dimensions.
+          stabilized = 0;
+          interval = setInterval(update, 1);
+        } else {
+          // cleanup.
+          clearInterval(interval);
+          // hide it.
+          instanceElement.css({display: 'none', visibility: ''});
+          // put it back where it belongs.
+          instanceElement.detach();
+          // otherwise it will not work the next time.
+          parent.append(instanceElement);
+        }
+      });
 
       // cleanup.
       scope.$on('$destroy', (): void => {

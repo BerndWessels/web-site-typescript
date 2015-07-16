@@ -207,12 +207,12 @@
       return '<select-input-compiled root-popup-target ng-click="click($event);">' +
         $templateCache.get(selectedOptionsTemplate) +
         $templateCache.get('select-input-input') +
-        '<root-popup top arrow align tabindex="-1" ng-if="openLimited" id="{{limitedPopupId}}">' +
+        '<root-popup arrow align tabindex="-1" open="openLimited" id="{{limitedPopupId}}">' +
         '<select-input-selected-options>' +
         $templateCache.get(selectedOptionsPopupTemplate) +
         '</select-input-selected-options>' +
         '</root-popup>' +
-        '<root-popup align tabindex="-1" ng-if="open">' +
+        '<root-popup align tabindex="-1" open="open">' +
         '<select-input-filtered-options>' +
         $templateCache.get(filteredOptionsTemplate) +
         '</select-input-filtered-options>' +
@@ -361,7 +361,7 @@
         if (!eventObject) {
           return;
         }
-        // escape closes the popup.
+        // move focus to the first selected option.
         if (eventObject.keyCode === 9 && eventObject.shiftKey === false) {
           var selector: string = '#' + (<any>scope).limitedPopupId + ' selected-option';
           angular.element(document.querySelector(selector)).focus();
@@ -413,14 +413,21 @@
         }
         // allow tab to the next element.
         if (eventObject.keyCode === 9) {
-          // select the next element.
-          if (angular.element(eventObject.target).next()[0]) {
+          if (eventObject.shiftKey === true && !angular.element(eventObject.target).prev()[0]) {
+            // redirect to the limit element.
+            instanceElement.find('selected-option').focus();
+            eventObject.preventDefault();
+            eventObject.stopPropagation();
             return;
           }
-          // redirect tab from the last element to the input.
-          instanceElement.find('input').focus();
-          eventObject.preventDefault();
-          eventObject.stopPropagation();
+          // select the next element.
+          if (eventObject.shiftKey === false && !angular.element(eventObject.target).next()[0]) {
+            // redirect tab from the last element to the input.
+            instanceElement.find('input').focus();
+            eventObject.preventDefault();
+            eventObject.stopPropagation();
+            return;
+          }
           return;
         }
         // the event came from a selected option.
